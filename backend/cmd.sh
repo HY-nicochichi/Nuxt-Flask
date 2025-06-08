@@ -1,0 +1,13 @@
+exec gunicorn core:app \
+  --bind 0.0.0.0:8000 \
+  --worker-tmp-dir /dev/shm \
+  --worker-class gthread \
+  --workers 1 \
+  --threads $APP_CONCURRENCY \
+  --timeout 15 \
+  --graceful-timeout 15 \
+  --keep-alive 630 \
+  --max-requests 3000 \
+  --max-requests-jitter 500 \
+  --access-logfile - \
+  --error-logfile -
