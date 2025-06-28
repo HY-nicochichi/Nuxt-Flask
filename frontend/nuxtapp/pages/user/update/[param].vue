@@ -7,24 +7,31 @@
     'email', 'password', 'name'
   ]
 
-  let param: Ref<string> = ref(route.params.param as string ?? '')
-  let type: Ref<string> = ref('password')
+  const param: Ref<string> = ref(route.params.param as string ?? '')
 
-  let current_val: Ref<string> = ref('')
-  let new_val: Ref<string> = ref('')
+  const current_val: Input = {
+    label: ref('current ' + param.value),
+    type: ref('text'),
+    model: ref('')
+  }
+  const new_val: Input = {
+    label: ref('new ' + param.value),
+    type: ref('text'),
+    model: ref('')
+  }
 
   async function tryUpdateUser(): Promise<void> {
-    if (current_val.value === '' || new_val.value === '') {
+    if (current_val.model.value === '' || new_val.model.value === '') {
       alert.value = {
         show: true,
         msg: 'Fill all input fields'
       }
-      current_val.value = ''
-      new_val.value = ''
+      current_val.model.value = ''
+      new_val.model.value = ''
     }
     else {
       const resp: Resp = await accessUserPut(
-        param.value, current_val.value, new_val.value
+        param.value, current_val.model.value, new_val.model.value
       )
       if (resp.status === 200) {
         router.push({name: 'user-info'})
@@ -34,17 +41,25 @@
           show: true,
           msg: resp.json.msg
         }
-        current_val.value = ''
-        new_val.value = ''
+        current_val.model.value = ''
+        new_val.model.value = ''
       }
     }
+  }
+
+  const inputs: Input[] = [
+    current_val, new_val
+  ]
+  const submit: Submit = {
+    name: ref('update'), func: (e: MouseEvent) => {tryUpdateUser()}
   }
 
   onBeforeMount(() => {
     if (GoodParams.includes(param.value)) {
       document.title = 'update ' + param.value
-      if (param.value !== 'password') {
-        type.value = 'text'
+      if (param.value === 'password') {
+        current_val.type.value = 'password'
+        new_val.type.value = 'password'
       }
     }
     else {
@@ -59,19 +74,6 @@
     <h4 class="fw-bolder mb-3">
       update {{ param }}
     </h4>
-    <div class="col-sm-9 col-md-7 col-lg-5 border border-primary bg-light p-3">
-      <div class="mb-4">
-        <label class="mb-2">current {{ param }}</label>
-        <input v-bind:type="type" class="form-control border border-primary" v-model="current_val"/>
-      </div>
-      <div class="mb-4">
-        <label class="mb-2">new {{ param }}</label>
-        <input v-bind:type="type" class="form-control border border-primary" v-model="new_val"/>
-      </div>
-      <br>
-      <div>
-        <button class="btn btn-primary" v-on:click="tryUpdateUser">update</button>
-      </div>
-    </div>
+    <Form v-bind:inputs="inputs" v-bind:submit="submit"/>
   </div>
 </template>

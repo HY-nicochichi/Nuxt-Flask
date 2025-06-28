@@ -14,6 +14,17 @@ interface Alert {
   msg: string
 }
 
+interface Input {
+  label: Ref<string>
+  type: Ref<string>
+  model: Ref<string>
+}
+
+interface Submit {
+  name: Ref<string>
+  func: (e: MouseEvent) => void
+}
+
 export type {
-  Resp, User, Alert
+  Resp, User, Alert, Input, Submit
 }

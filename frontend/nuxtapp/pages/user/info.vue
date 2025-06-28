@@ -2,9 +2,9 @@
   const router = useRouter()
   const user = useUserStore()
 
-  function confirmDeleteUser(): void {
-    if (confirm('Comfirm user deletion?') === true) {
-      accessUserDelete()
+  async function confirmDeleteUser(): Promise<void> {
+    if (confirm('Comfirm user deletion?')) {
+      await accessUserDelete()
       setJwt()
       router.push({name: 'index'})
     }

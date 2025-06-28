@@ -1,5 +1,12 @@
 <script setup lang="ts">
   const alert = useAlertStore()
+
+  onBeforeMount(() => {
+    alert.value = {
+      show: false,
+      msg: ''
+    }
+  })
 </script>
 
 <template>
