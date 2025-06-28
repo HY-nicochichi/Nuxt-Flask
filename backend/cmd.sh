@@ -1,6 +1,4 @@
-sleep 5
+sleep 7
 
-pytest tests/test_jwt.py
-pytest tests/test_user.py
-
+pytest tests
 gunicorn core:app -b :5000 -k gevent -w 8

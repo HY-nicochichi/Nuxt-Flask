@@ -21,14 +21,14 @@ class UserHelper():
     def search_by_email(self: Self, email: str) -> User|None:
         return User.query.filter_by(email=email).one_or_none()
 
-    def authenticate(self: Self, data: JWTPost) -> dict[str, str]:
+    def authenticate(self: Self, data: JWTPost) -> tuple[str, str|None]:
         user: User|None = self.search_by_email(data.email)
         if user == None:
-            return {'msg': 'Email incorrect'}
+            return 'Email incorrect', None
         elif check_password_hash(user.password_hash, data.password) == False:
-            return {'msg': 'Password incorrect'}
+            return 'Password incorrect', None
         else:
-            return {'msg': 'Success', 'id': user.id}
+            return 'Success', user.id
 
     def create(self: Self, data: UserPost) -> tuple[str, int]:
         if self.search_by_email(data.email):

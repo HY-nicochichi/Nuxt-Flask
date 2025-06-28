@@ -1,5 +1,6 @@
-const jwt_api_route = 'http://localhost:5000/jwt/'
-const user_api_route = 'http://localhost:5000/user/'
+const api_domain: string = 'http://localhost:5000'
+const jwt_api_route: string = api_domain + '/jwt/'
+const user_api_route: string = api_domain + '/user/'
 
 async function accessJwtPost(email: string, password: string): Promise<Resp> {
   const response: Response = await fetch(

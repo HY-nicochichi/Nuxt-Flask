@@ -1,89 +1,61 @@
 <script setup lang="ts">
-const router = useRouter()
-const route = useRoute()
+  const router = useRouter()
+  const route = useRoute()
+  const alert = useAlertStore()
 
-const GoodParams: string[] = [
-  'email', 'password', 'name'
-]
+  const GoodParams: string[] = [
+    'email', 'password', 'name'
+  ]
 
-let user: Ref<User> = ref({
-  login: false,
-  name: '',
-  email: ''
-})
+  let param: Ref<string> = ref(route.params.param as string ?? '')
+  let type: Ref<string> = ref('password')
 
-let alert: Ref<Alert> = ref({
-  show: false,
-  msg: ''
-})
+  let current_val: Ref<string> = ref('')
+  let new_val: Ref<string> = ref('')
 
-let param: Ref<string> = ref(route.params.param as string || '')
-
-let type: Ref<string> = ref('password')
-
-let current_val: Ref<string> = ref('')
-let new_val: Ref<string> = ref('')
-
-async function setUserInfo(): Promise<void> {
-  const resp: Resp = await accessUserGet()
-  if (resp.status === 200) {
-    user.value = {
-      login: true,
-      name: resp.json.name,
-      email: resp.json.email
-    }
-  }
-  else {
-    setJwt()
-    router.push({name: 'user-auth'})
-  }
-}
-
-async function tryUpdateUser(): Promise<void> {
-  if (current_val.value === '' || new_val.value === '') {
-    alert.value = {
-      show: true,
-      msg: 'Fill all input fields'
-    }
-    current_val.value = ''
-    new_val.value = ''
-  }
-  else {
-    const resp: Resp = await accessUserPut(
-      param.value, current_val.value, new_val.value
-    )
-    if (resp.status === 200) {
-      router.push({name: 'user-info'})
-    }
-    else {
+  async function tryUpdateUser(): Promise<void> {
+    if (current_val.value === '' || new_val.value === '') {
       alert.value = {
         show: true,
-        msg: resp.json.msg
+        msg: 'Fill all input fields'
       }
       current_val.value = ''
       new_val.value = ''
     }
-  }
-}
-
-onBeforeMount(() => {
-  if (GoodParams.includes(param.value) === true) {
-    document.title = 'update ' + param.value
-    if (param.value !== 'password') {
-      type.value = 'text'
+    else {
+      const resp: Resp = await accessUserPut(
+        param.value, current_val.value, new_val.value
+      )
+      if (resp.status === 200) {
+        router.push({name: 'user-info'})
+      }
+      else {
+        alert.value = {
+          show: true,
+          msg: resp.json.msg
+        }
+        current_val.value = ''
+        new_val.value = ''
+      }
     }
-    setUserInfo()
   }
-  else {
-    router.push('/404')
-  }
-})
+
+  onBeforeMount(() => {
+    if (GoodParams.includes(param.value)) {
+      document.title = 'update ' + param.value
+      if (param.value !== 'password') {
+        type.value = 'text'
+      }
+    }
+    else {
+      router.push('/404')
+    }
+  })
 </script>
 
 <template>
-  <NavBar v-bind:user="user"/>
   <div class="p-3">
-    <AlertBox v-bind:alert="alert"/>
+    <AlertBox/>
     <h4 class="fw-bolder mb-3">
       update {{ param }}
     </h4>

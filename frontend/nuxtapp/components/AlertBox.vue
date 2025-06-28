@@ -1,9 +1,9 @@
 <script setup lang="ts">
-defineProps<{alert: Alert}>()
+  const alert = useAlertStore()
 </script>
 
 <template>
-  <div v-if="alert.show === true" class="alert alert-danger mb-3" role="alert">
-    ※ {{ alert.msg }}
+  <div v-if="alert.value.show" class="alert alert-danger mb-3" role="alert">
+    ※ {{ alert.value.msg }}
   </div>
 </template>

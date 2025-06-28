@@ -2,10 +2,16 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: true },
   ssr: false,
+  modules: [
+    '@pinia/nuxt'
+  ],
+  imports: {
+    dirs: ["stores"],
+  },
   app: {
     head: {
       htmlAttrs: {
-        lang: 'ja'
+        lang: 'en'
       },
       meta: [
         { charset: 'utf-8' },

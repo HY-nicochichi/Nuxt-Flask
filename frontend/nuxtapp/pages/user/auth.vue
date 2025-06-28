@@ -1,68 +1,46 @@
 <script setup lang="ts">
-const router = useRouter()
+  const router = useRouter()
+  const alert = useAlertStore()
 
-let user: Ref<User> = ref({
-  login: false,
-  name: '',
-  email: ''
-})
+  let email: Ref<string> = ref('')
+  let password: Ref<string> = ref('')
 
-let alert: Ref<Alert> = ref({
-  show: false,
-  msg: ''
-})
-
-let email: Ref<string> = ref('')
-let password: Ref<string> = ref('')
-
-async function checkLoggedIn(): Promise<void> {
-  const resp: Resp = await accessUserGet()
-  if (resp.status === 200) {
-    router.push({name: 'index'})
-  }
-  else {
-    setJwt()
-  }
-}
-
-async function tryLogin(): Promise<void> {
-  if (email.value === '' || password.value === '') {
-    alert.value = {
-      show: true,
-      msg: 'Fill all input fields'
-    }
-    email.value = ''
-    password.value = ''
-  }
-  else {
-    const resp: Resp = await accessJwtPost(
-      email.value, password.value
-    )
-    if (resp.status === 200) {
-      setJwt(resp.json.access_token)
-      router.push({name: 'index'})
-    }
-    else {
+  async function tryLogin(): Promise<void> {
+    if (email.value === '' || password.value === '') {
       alert.value = {
         show: true,
-        msg: resp.json.msg
+        msg: 'Fill all input fields'
       }
       email.value = ''
       password.value = ''
     }
+    else {
+      const resp: Resp = await accessJwtPost(
+        email.value, password.value
+      )
+      if (resp.status === 200) {
+        setJwt(resp.json.access_token)
+        router.push({name: 'index'})
+      }
+      else {
+        alert.value = {
+          show: true,
+          msg: resp.json.msg
+        }
+        email.value = ''
+        password.value = ''
+      }
+    }
   }
-}
 
-onBeforeMount(() => {
-  document.title = 'login'
-  checkLoggedIn()
-})
+  onBeforeMount(() => {
+    document.title = 'login'
+  })
 </script>
 
 <template>
-  <NavBar v-bind:user="user"/>
   <div class="p-3">
-    <AlertBox v-bind:alert="alert"/>
+    <AlertBox/>
     <h4 class="fw-bolder mb-3">
       login
     </h4>

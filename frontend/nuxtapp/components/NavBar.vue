@@ -1,17 +1,16 @@
 <script setup lang="ts">
-defineProps<{user: User}>()
+  const router = useRouter()
+  const route = useRoute()
+  const user = useUserStore()
 
-const router = useRouter()
-const route = useRoute()
-
-function tryLogout(): void {
-  setJwt()
-  if (route.name === 'index') {
-    router.go(0)
-  } else {
-    router.push({ name: 'index' })
+  function tryLogout(): void {
+    setJwt()
+    if (route.name === 'index') {
+      router.go(0)
+    } else {
+      router.push({ name: 'index' })
+    }
   }
-}
 </script>
 
 <template>
@@ -29,14 +28,14 @@ function tryLogout(): void {
         </svg>
       </button>
       <div class="collapse navbar-collapse justify-content-end" id="NavBarContent">
-        <ul v-if="user.login === true" class="navbar-nav">
+        <ul v-if="user.value.login" class="navbar-nav">
           <li class="nav-item">
             <NuxtLink to="/user/info" class="nav-link active me-2">
-              {{ user.name }}
+              {{ user.value.name }}
             </NuxtLink>
           </li>
           <li class="nav-item">
-            <NuxtLink class="nav-link active" v-on:click="tryLogout">
+            <NuxtLink to="" class="nav-link active" v-on:click="tryLogout">
               logout
             </NuxtLink>
           </li>

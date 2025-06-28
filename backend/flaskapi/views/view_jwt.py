@@ -15,9 +15,9 @@ def jwt_post() -> tuple[dict, int]:
         data = JWTPost.model_validate(request.get_json(silent=True))
     except (TypeError, ValidationError):
         return {'msg': 'Invalid Content-Type header or JSON body'}, 400
-    result: dict[str, str] = user_helper.authenticate(data)
-    if result['msg'] == 'Success':
-        access_token: str = create_access_token(identity=result['id'])
-        return {'access_token': access_token}, 200
+    msg, id = user_helper.authenticate(data)
+    if msg == 'Success':
+        access_token: str = create_access_token(identity=id)
+        return {'msg': msg, 'access_token': access_token}, 200
     else:
-        return {'msg': result['msg']}, 401
+        return {'msg': msg}, 401
