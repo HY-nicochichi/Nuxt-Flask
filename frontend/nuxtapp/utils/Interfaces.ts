@@ -21,7 +21,7 @@ interface Input {
 }
 
 interface Submit {
-  name: Ref<string>
+  name: string
   func: (e: MouseEvent) => void
 }
 

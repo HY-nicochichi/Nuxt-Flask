@@ -13,14 +13,17 @@
     model: ref('')
   }
 
+  const inputs: Input[] = [email, password]
+
   async function tryLogin(): Promise<void> {
-    if (email.model.value === '' || password.model.value === '') {
+    if (inputs.some(input => input.model.value === '')) {
       alert.value = {
         show: true,
         msg: 'Fill all input fields'
       }
-      email.model.value = ''
-      password.model.value = ''
+      for (const input of inputs) {
+        input.model.value = ''
+      }
     }
     else {
       const resp: Resp = await accessJwtPost(
@@ -35,17 +38,15 @@
           show: true,
           msg: resp.json.msg
         }
-        email.model.value = ''
-        password.model.value = ''
+        for (const input of inputs) {
+          input.model.value = ''
+        }
       }
     }
   }
 
-  const inputs: Input[] = [
-    email, password
-  ]
   const submit: Submit = {
-    name: ref('login'), func: (e: MouseEvent) => {tryLogin()}
+    name: 'login', func: (e: MouseEvent) => {tryLogin()}
   }
 
   onBeforeMount(() => {

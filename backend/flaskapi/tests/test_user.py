@@ -1,4 +1,3 @@
-import pytest
 from time import sleep
 from uuid import uuid4
 from json import dumps

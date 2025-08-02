@@ -10,7 +10,7 @@
     </div>
     <br>
     <div>
-      <button class="btn btn-primary" v-on:click="submit.func">{{ submit.name.value }}</button>
+      <button class="btn btn-primary" v-on:click="submit.func">{{ submit.name }}</button>
     </div>
   </div>
 </template>

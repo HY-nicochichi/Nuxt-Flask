@@ -7,16 +7,16 @@ from sqlalchemy.orm import (
     Mapped,
     mapped_column
 )
-from extensions import TableBase
+from extensions import db_orm
 
-class User(TableBase):
+class User(db_orm.Model):
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(nullable=False)
     name: Mapped[str] = mapped_column(nullable=False)
 
 class UserPost(BaseModel):
-    email: str = Field(min_length=1)
-    password: str = Field(min_length=1)
+    email: str = Field(min_length=3)
+    password: str = Field(min_length=6, max_length=20)
     name: str = Field(min_length=1)
 
 class UserPut(BaseModel):

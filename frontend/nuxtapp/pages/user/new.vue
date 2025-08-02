@@ -18,15 +18,17 @@
     model: ref('')
   }
 
+  const inputs: Input[] = [email, password, name]
+
   async function tryCreateUser(): Promise<void> {
-    if ( email.model.value === '' || password.model.value === '' || name.model.value === '') {
+    if (inputs.some(input => input.model.value === '')) {
       alert.value = {
         show: true,
         msg: 'Fill all input fields'
       }
-      email.model.value = ''
-      password.model.value = ''
-      name.model.value = ''
+      for (const input of inputs) {
+        input.model.value = ''
+      }
     }
     else {
       const resp1: Resp = await accessUserPost(
@@ -44,18 +46,15 @@
           show: true,
           msg: resp1.json.msg
         }
-        email.model.value = ''
-        password.model.value = ''
-        name.model.value = ''
+        for (const input of inputs) {
+          input.model.value = ''
+        }
       }
     }
   }
 
-  const inputs: Input[] = [
-    email, password, name
-  ]
   const submit: Submit = {
-    name: ref('create'), func: (e: MouseEvent) => {tryCreateUser()}
+    name: 'create', func: (e: MouseEvent) => {tryCreateUser()}
   }
 
   onBeforeMount(() => {

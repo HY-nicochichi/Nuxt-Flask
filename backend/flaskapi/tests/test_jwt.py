@@ -1,6 +1,6 @@
-import pytest
 from json import dumps
 from flask import Flask
+from flask_jwt_extended import decode_token
 from . import (
     app,
     sample_user
@@ -64,4 +64,7 @@ def test_jwt_post(app: Flask) -> None:
         })
     )
     assert good_resp.status_code == 200
-    assert 'access_token' in good_resp.get_json()
+    assert good_resp.get_json()['msg'] == 'Success'
+    with app.app_context():
+        access_token = good_resp.get_json()['access_token']
+        assert decode_token(access_token)['sub'] == user.id
