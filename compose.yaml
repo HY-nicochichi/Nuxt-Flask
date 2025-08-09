@@ -3,8 +3,7 @@ services:
   database:
     container_name: nuxt-flask-database
     build: ./database
-    volumes:
-      - volume:/var/lib/postgresql/data
+    volumes: [volume:/var/lib/postgresql/data]
     healthcheck:
       test: [CMD-SHELL, pg_isready -U postgres]
       interval: 2s
