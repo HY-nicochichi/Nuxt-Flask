@@ -53,7 +53,7 @@ def test_user_post(app: Flask) -> None:
         headers = {'Content-Type': 'application/json'},
         data = dumps({
             'email': user.email,
-            'password': 'Jiro123',
+            'password': 'Jiro1234',
             'name': 'Jiro'
         })
     )
@@ -65,7 +65,7 @@ def test_user_post(app: Flask) -> None:
         headers = {'Content-Type': 'application/json'},
         data = dumps({
             'email': 'jiro@email.com',
-            'password': 'Jiro123',
+            'password': 'Jiro1234',
             'name': 'Jiro'
         })
     )
@@ -130,8 +130,8 @@ def test_user_put(app: Flask) -> None:
         },
         data = dumps({
             'param': 'password',
-            'current_val': 'Jiro123',
-            'new_val': 'Jiro123'
+            'current_val': 'Jiro1234',
+            'new_val': 'Jiro1234'
         })
     )
     assert bad_resp3.status_code == 404
@@ -146,7 +146,7 @@ def test_user_put(app: Flask) -> None:
         data = dumps({
             'param': 'password',
             'current_val': password,
-            'new_val': 'Jiro123'
+            'new_val': 'Jiro1234'
         })
     )
     assert good_resp2.status_code == 200

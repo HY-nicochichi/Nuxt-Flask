@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Flask REST-API",
-    "version": "1.0.7"
+    "version": "1.0.8"
   },
   "components": {
     "securitySchemes": {
@@ -42,7 +42,7 @@
                   "password": {
                     "type": "string",
                     "required": true,
-                    "example": "Taro123"
+                    "example": "Taro1234"
                   }
                 }
               }
@@ -125,7 +125,7 @@
                   "password": {
                     "type": "string",
                     "required": true,
-                    "example": "Taro123"
+                    "example": "Taro1234"
                   },
                   "name": {
                     "type": "string",

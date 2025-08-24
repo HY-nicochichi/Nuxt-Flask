@@ -1,14 +1,10 @@
 <script setup lang="ts">
-  const router = useRouter()
-  const route = useRoute()
-  const user = useUserStore()
-
   function tryLogout(): void {
     setJwt()
-    if (route.name === 'index') {
-      router.go(0)
+    if (useRoute().name === 'index') {
+      useRouter().go(0)
     } else {
-      router.push({ name: 'index' })
+      useRouter().push({name: 'index'})
     }
   }
 </script>
@@ -28,26 +24,26 @@
         </svg>
       </button>
       <div class="collapse navbar-collapse justify-content-end" id="NavBarContent">
-        <ul v-if="user.value.login" class="navbar-nav">
+        <ul v-if="useUserStore().value.login" class="navbar-nav">
           <li class="nav-item">
-            <NuxtLink to="/user/info" class="nav-link active me-2">
-              {{ user.value.name }}
+            <NuxtLink to="/user/info" class="nav-link active fw-bolder me-2">
+              {{ useUserStore().value.name }}
             </NuxtLink>
           </li>
           <li class="nav-item">
-            <NuxtLink to="" class="nav-link active" v-on:click="tryLogout">
+            <NuxtLink class="nav-link active fw-bolder" v-on:click="tryLogout">
               logout
             </NuxtLink>
           </li>
         </ul>
         <ul v-else class="navbar-nav">
           <li class="nav-item">
-            <NuxtLink to="/user/auth" class="nav-link active me-2">
+            <NuxtLink to="/user/auth" class="nav-link active fw-bolder me-2">
               login
             </NuxtLink>
           </li>
           <li class="nav-item">
-            <NuxtLink to="/user/new" class="nav-link active">
+            <NuxtLink to="/user/new" class="nav-link active fw-bolder">
               new user
             </NuxtLink>
           </li>

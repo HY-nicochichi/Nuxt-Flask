@@ -49,7 +49,7 @@ def test_jwt_post(app: Flask) -> None:
         headers = {'Content-Type': 'application/json'},
         data = dumps({
             'email': user.email,
-            'password': 'Jiro123'
+            'password': 'Jiro1234'
         })
     )
     assert bad_resp4.status_code == 401

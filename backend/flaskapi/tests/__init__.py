@@ -38,7 +38,7 @@ def app():
         db_orm.drop_all()
 
 def sample_user(app: Flask) -> tuple[User, str]:
-    password: str = 'Taro123'
+    password: str = 'Taro1234'
     user = User(
         id = str(uuid4()),
         email = 'taro@email.com',

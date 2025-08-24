@@ -3,27 +3,21 @@ export default defineNuxtRouteMiddleware(async(to, from) => {
   const resp: Resp = await accessUserGet()
 
   if (resp.status === 200) {
-    user.value = {
-      login: true,
-      email: resp.json.email,
-      name: resp.json.name
-    }
+    user.loginUser(resp.json.email, resp.json.name)
   }
   else {
-    user.value = {
-      login: false, email: '', name: ''
-    }
+    user.clear()
     setJwt()
   }
 
-  const NoAuthRoutes: string[] = ['user-auth', 'user-new']
+  const NoAuthRoutes: string[] = ['login', 'user-new']
 
   if (to.name !== 'index'){
     if (user.value.login && NoAuthRoutes.includes(to.name as string)) {
       return navigateTo({name: 'index'})
     }
     if (!user.value.login && !NoAuthRoutes.includes(to.name as string)) {
-      return navigateTo({name: 'user-auth'})
+      return navigateTo({name: 'login'})
     }
   }
 })
