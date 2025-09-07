@@ -18,7 +18,7 @@ def user_get() -> tuple[dict, int]:
     return {'email': current_user.email, 'name': current_user.name}, 200
 
 @bp_user.post('/')
-@validate_json(UserPost)
+@validate_json
 def user_post(data: UserPost) -> tuple[dict, int]:
     if User.create(data.email, data.password, data.name):
         return {'msg': 'Success'}, 200
@@ -27,7 +27,7 @@ def user_post(data: UserPost) -> tuple[dict, int]:
 
 @bp_user.put('/')
 @jwt_required()
-@validate_json(UserPut)
+@validate_json
 def user_put(data: UserPut) -> tuple[dict, int]:
     match data.param:
         case 'email':

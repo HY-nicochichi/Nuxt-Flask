@@ -7,7 +7,7 @@ from validations.jwt import JWTPost
 bp_jwt = Blueprint('bp_jwt', __name__, url_prefix='/jwt')
 
 @bp_jwt.post('/')
-@validate_json(JWTPost)
+@validate_json
 def jwt_post(data: JWTPost) -> tuple[dict, int]:
     user: User|None = User.search_by_email(data.email)
     if user and user.is_password_matched(data.password):
