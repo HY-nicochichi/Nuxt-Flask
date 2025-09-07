@@ -2,20 +2,24 @@ from time import sleep
 from uuid import uuid4
 from json import dumps
 from flask import Flask
-from . import (
+from flask.testing import FlaskClient
+from flask_jwt_extended import create_access_token
+from models import User
+from tests import (
     app,
-    sample_jwt,
-    sample_user
+    client,
+    password,
+    user,
+    headers
 )
 
 USER_API_ROUTE = '/user/'
 
-def test_user_get(app: Flask) -> None:
-    client = app.test_client()
-    user, _ = sample_user(app)
+def test_user_get(app: Flask, client: FlaskClient, user: User) -> None:
     bad_id = str(uuid4())
-    bad_jwt = sample_jwt(app, bad_id)
-    good_jwt = sample_jwt(app, user.id)
+    with app.app_context():
+        bad_jwt: str = create_access_token(bad_id)
+        good_jwt: str = create_access_token(user.id)
     
     bad_resp1 = client.get(USER_API_ROUTE)
     assert bad_resp1.status_code == 401
@@ -44,13 +48,10 @@ def test_user_get(app: Flask) -> None:
     assert bad_resp3.status_code == 401
     assert bad_resp3.get_json()['msg'] == 'Token has expired'
 
-def test_user_post(app: Flask) -> None:
-    client = app.test_client()
-    user, _ = sample_user(app)
-
+def test_user_post(client: FlaskClient, user: User, headers: dict[str, str]) -> None:
     bad_resp = client.post(
         USER_API_ROUTE,
-        headers = {'Content-Type': 'application/json'},
+        headers = headers,
         data = dumps({
             'email': user.email,
             'password': 'Jiro1234',
@@ -62,7 +63,7 @@ def test_user_post(app: Flask) -> None:
 
     good_resp = client.post(
         USER_API_ROUTE,
-        headers = {'Content-Type': 'application/json'},
+        headers = headers,
         data = dumps({
             'email': 'jiro@email.com',
             'password': 'Jiro1234',
@@ -72,32 +73,24 @@ def test_user_post(app: Flask) -> None:
     assert good_resp.status_code == 200
     assert good_resp.get_json()['msg'] == 'Success'
 
-def test_user_put(app: Flask) -> None:
-    client = app.test_client()
-    user, password = sample_user(app)
-    jwt = sample_jwt(app, user.id)
-    
+def test_user_put(
+    client: FlaskClient, password: str, user: User, headers: dict[str, str]
+) -> None:
     bad_resp1 = client.put(
         USER_API_ROUTE,
-        headers = {
-            'Authorization': f'Bearer {jwt}',
-            'Content-Type': 'application/json'
-        },
+        headers = headers,
         data = dumps({
             'param': 'email',
             'current_val': 'jiro@email.com',
             'new_val': 'jiro@email.com'
         })
     )
-    assert bad_resp1.status_code == 404
-    assert bad_resp1.get_json()['msg'] == 'Current email incorrect'
+    assert bad_resp1.status_code == 400
+    assert bad_resp1.get_json()['msg'] == 'Invalid current value'
    
     bad_resp2 = client.put(
         USER_API_ROUTE,
-        headers = {
-            'Authorization': f'Bearer {jwt}',
-            'Content-Type': 'application/json'
-        },
+        headers = headers,
         data = dumps({
             'param': 'email',
             'current_val': user.email,
@@ -105,14 +98,11 @@ def test_user_put(app: Flask) -> None:
         })
     )
     assert bad_resp2.status_code == 409
-    assert bad_resp2.get_json()['msg'] == 'New email already taken'
+    assert bad_resp2.get_json()['msg'] == 'New value already taken'
     
     good_resp1 = client.put(
         USER_API_ROUTE,
-        headers = {
-            'Authorization': f'Bearer {jwt}',
-            'Content-Type': 'application/json'
-        },
+        headers = headers,
         data = dumps({
             'param': 'email',
             'current_val': user.email,
@@ -124,25 +114,19 @@ def test_user_put(app: Flask) -> None:
     
     bad_resp3 = client.put(
         USER_API_ROUTE,
-        headers = {
-            'Authorization': f'Bearer {jwt}',
-            'Content-Type': 'application/json'
-        },
+        headers = headers,
         data = dumps({
             'param': 'password',
             'current_val': 'Jiro1234',
             'new_val': 'Jiro1234'
         })
     )
-    assert bad_resp3.status_code == 404
-    assert bad_resp3.get_json()['msg'] == 'Current password incorrect'
+    assert bad_resp3.status_code == 400
+    assert bad_resp3.get_json()['msg'] == 'Invalid current value'
     
     good_resp2 = client.put(
         USER_API_ROUTE,
-        headers = {
-            'Authorization': f'Bearer {jwt}',
-            'Content-Type': 'application/json'
-        },
+        headers = headers,
         data = dumps({
             'param': 'password',
             'current_val': password,
@@ -154,10 +138,7 @@ def test_user_put(app: Flask) -> None:
     
     good_resp3 = client.put(
         USER_API_ROUTE,
-        headers = {
-            'Authorization': f'Bearer {jwt}',
-            'Content-Type': 'application/json'
-        },
+        headers = headers,
         data = dumps({
             'param': 'name',
             'current_val': user.name,
@@ -167,13 +148,10 @@ def test_user_put(app: Flask) -> None:
     assert good_resp3.status_code == 200
     assert good_resp3.get_json()['msg'] == 'Success'
 
-def test_user_delete(app: Flask) -> None:
-    client = app.test_client()
-    user, _ = sample_user(app)
-
+def test_user_delete(client: FlaskClient, headers: dict[str, str]) -> None:
     good_resp = client.delete(
         USER_API_ROUTE,
-        headers = {'Authorization': f'Bearer {sample_jwt(app, user.id)}'}
+        headers = headers
     )
     assert good_resp.status_code == 200
     assert good_resp.get_json()['msg'] == 'Success'

@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Flask REST-API",
-    "version": "1.0.8"
+    "version": "1.0.9"
   },
   "components": {
     "securitySchemes": {
@@ -57,10 +57,6 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "msg": {
-                      "type": "string",
-                      "example": "Success"
-                    },
                     "access_token": {
                       "type": "string",
                       "example": "Json.Web.Token"

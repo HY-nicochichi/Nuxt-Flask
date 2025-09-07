@@ -1,8 +1,11 @@
+from typing import (
+    Generator,
+    Any
+)
 from datetime import timedelta
-from uuid import uuid4
 from pytest import fixture
 from flask import Flask
-from werkzeug.security import generate_password_hash
+from flask.testing import FlaskClient
 from flask_jwt_extended import create_access_token
 from models import User
 from views import bps
@@ -13,7 +16,7 @@ from extensions import (
 )
 
 @fixture(scope='function')
-def app():
+def app() -> Generator[Flask, Any, None]:
     app = Flask('test')
 
     app.config.from_pyfile('/flaskapi/settings.py')
@@ -37,21 +40,25 @@ def app():
         db_orm.session.remove()
         db_orm.drop_all()
 
-def sample_user(app: Flask) -> tuple[User, str]:
-    password: str = 'Taro1234'
-    user = User(
-        id = str(uuid4()),
-        email = 'taro@email.com',
-        password_hash = generate_password_hash(password),
-        name = 'Taro'
-    )
-    with app.app_context():
-        db_orm.session.add(user)
-        db_orm.session.commit()
-        db_orm.session.refresh(user)
-    return user, password
+@fixture(scope='function')
+def client(app: Flask) -> FlaskClient:
+    return app.test_client()
 
-def sample_jwt(app: Flask, id: str) -> str:
+@fixture(scope='function')
+def password() -> str:
+    return 'Taro1234'
+
+@fixture(scope='function')
+def user(app: Flask, password: str) -> User:
     with app.app_context():
-        jwt: str = create_access_token(identity=id)
-    return jwt
+        user = User.create('taro@email.com', password, 'Taro')
+        db_orm.session.refresh(user)
+    return user
+
+@fixture(scope='function')
+def headers(app: Flask, user: User) -> dict[str, str]:
+    with app.app_context():
+        return {
+            'Authorization': f'Bearer {create_access_token(user.id)}',
+            'Content-Type': 'application/json'
+        }

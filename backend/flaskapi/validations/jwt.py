@@ -3,7 +3,7 @@ from pydantic import (
     BaseModel,
     field_validator
 )
-from .validate_func import (
+from validations import (
     validate_email,
     validate_password
 )
@@ -14,10 +14,8 @@ class JWTPost(BaseModel):
 
     @field_validator('email')
     def email_validator(cls: Self, val: str) -> str:
-        validate_email(val)
-        return val
+        return validate_email(val)
     
     @field_validator('password')
     def password_validator(cls: Self, val: str) -> str:
-        validate_password(val)
-        return val
+        return validate_password(val)
