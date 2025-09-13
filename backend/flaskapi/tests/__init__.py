@@ -1,11 +1,6 @@
-from typing import (
-    Generator,
-    Any
-)
 from datetime import timedelta
 from pytest import fixture
 from flask import Flask
-from flask.testing import FlaskClient
 from flask_jwt_extended import create_access_token
 from models import User
 from views import bps
@@ -16,7 +11,7 @@ from extensions import (
 )
 
 @fixture(scope='function')
-def app() -> Generator[Flask, Any, None]:
+def app():
     app = Flask('test')
 
     app.config.from_pyfile('/flaskapi/settings.py')
@@ -41,22 +36,22 @@ def app() -> Generator[Flask, Any, None]:
         db_orm.drop_all()
 
 @fixture(scope='function')
-def client(app: Flask) -> FlaskClient:
+def client(app: Flask):
     return app.test_client()
 
 @fixture(scope='function')
-def password() -> str:
+def password():
     return 'Taro1234'
 
 @fixture(scope='function')
-def user(app: Flask, password: str) -> User:
+def user(app: Flask, password: str):
     with app.app_context():
         user = User.create('taro@email.com', password, 'Taro')
         db_orm.session.refresh(user)
     return user
 
 @fixture(scope='function')
-def headers(app: Flask, user: User) -> dict[str, str]:
+def headers(app: Flask, user: User):
     with app.app_context():
         return {
             'Authorization': f'Bearer {create_access_token(user.id)}',

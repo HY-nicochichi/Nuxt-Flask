@@ -1,14 +1,12 @@
 function validateEmail(val: string): boolean {
-  const split = val.split('@')
-  return split.length === 2 && split[0] !== '' && split[1] !== '' && val.length >= 8 && val.length <= 32
+  return /^(?=.{10,32}$)[a-z0-9.-]+@[a-z0-9-]+\.[a-z0-9.-]+$/.test(val)
 }
-
 function validatePassword(val: string): boolean {
-  return /[a-zA-Z]/.test(val) && /[0-9]/.test(val) && val.length >= 8 && val.length <= 16
+  return /^(?=.{8,16}$)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])[a-zA-Z0-9]+$/.test(val)
 }
 
 function validateName(val: string) {
-  return val !== '' && val.length <= 16
+  return /^.{1,16}$/.test(val)
 }
 
 function validateEmpty(val: string): boolean {
@@ -16,17 +14,15 @@ function validateEmpty(val: string): boolean {
 }
 
 function selectValidation(type: string): Validation {
-  if (type === 'email') {
-    return validateEmail
-  }
-  else if (type === 'password') {
-    return validatePassword
-  }
-  else if (type === 'name') {
-    return validateName
-  }  
-  else {
-    return validateEmpty
+  switch (type) {
+    case 'email':
+      return validateEmail
+    case 'password':
+      return validatePassword
+    case 'name':
+      return validateName
+    default:
+      return validateEmpty
   }
 }
 

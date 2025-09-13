@@ -7,7 +7,7 @@ from pydantic import (
     ValidationInfo,
     field_validator
 )
-from validations import (
+from . import (
     validate_email,
     validate_password,
     validate_name

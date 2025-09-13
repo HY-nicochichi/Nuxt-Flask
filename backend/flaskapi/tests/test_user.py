@@ -5,7 +5,7 @@ from flask import Flask
 from flask.testing import FlaskClient
 from flask_jwt_extended import create_access_token
 from models import User
-from tests import (
+from . import (
     app,
     client,
     password,

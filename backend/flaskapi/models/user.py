@@ -17,16 +17,12 @@ class User(db_orm.Model):
     name: Mapped[str] = mapped_column(nullable=False)
 
     @classmethod
-    def search_by_id(cls: Self, user_id: str) -> Self|None:
-        return db_orm.session.execute(
-            select(cls).where(cls.id == user_id)
-        ).scalar_one_or_none()
+    def search_by_id(cls: Self, id: str) -> Self|None:
+        return db_orm.session.scalar(select(cls).where(cls.id == id))
 
     @classmethod
     def search_by_email(cls: Self, email: str) -> Self|None:
-        return db_orm.session.execute(
-            select(cls).where(cls.email == email)
-        ).scalar_one_or_none()
+        return db_orm.session.scalar(select(cls).where(cls.email == email))
     
     @classmethod
     def create(cls: Self, email: str, password: str, name: str) -> Self|None:

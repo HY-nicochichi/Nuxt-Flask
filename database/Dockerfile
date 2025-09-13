@@ -1,4 +1,4 @@
-FROM postgres:17.5-alpine
+FROM postgres:17.6-alpine
 
 ENV POSTGRES_USER=postgres
 ENV POSTGRES_PASSWORD=password
