@@ -37,8 +37,8 @@ def test_user_get(app: Flask, client: FlaskClient, user: User) -> None:
         headers = {'Authorization': f'Bearer {good_jwt}'}
     )
     assert good_resp.status_code == 200
-    assert 'email' in good_resp.get_json()
-    assert 'name' in good_resp.get_json()
+    assert good_resp.get_json()['email'] == user.email
+    assert good_resp.get_json()['name'] == user.name
     
     sleep(7.0)
     bad_resp3 = client.get(
@@ -70,13 +70,13 @@ def test_user_post(client: FlaskClient, user: User, headers: dict[str, str]) -> 
             'name': 'Jiro'
         })
     )
-    assert good_resp.status_code == 200
+    assert good_resp.status_code == 201
     assert good_resp.get_json()['msg'] == 'Success'
 
-def test_user_put(
+def test_user_patch(
     client: FlaskClient, password: str, user: User, headers: dict[str, str]
 ) -> None:
-    bad_resp1 = client.put(
+    bad_resp1 = client.patch(
         USER_API_ROUTE,
         headers = headers,
         data = dumps({
@@ -88,7 +88,7 @@ def test_user_put(
     assert bad_resp1.status_code == 400
     assert bad_resp1.get_json()['msg'] == 'Invalid current value'
    
-    bad_resp2 = client.put(
+    bad_resp2 = client.patch(
         USER_API_ROUTE,
         headers = headers,
         data = dumps({
@@ -100,7 +100,7 @@ def test_user_put(
     assert bad_resp2.status_code == 409
     assert bad_resp2.get_json()['msg'] == 'New value already taken'
     
-    good_resp1 = client.put(
+    good_resp1 = client.patch(
         USER_API_ROUTE,
         headers = headers,
         data = dumps({
@@ -112,7 +112,7 @@ def test_user_put(
     assert good_resp1.status_code == 200
     assert good_resp1.get_json()['msg'] == 'Success'
     
-    bad_resp3 = client.put(
+    bad_resp3 = client.patch(
         USER_API_ROUTE,
         headers = headers,
         data = dumps({
@@ -124,7 +124,7 @@ def test_user_put(
     assert bad_resp3.status_code == 400
     assert bad_resp3.get_json()['msg'] == 'Invalid current value'
     
-    good_resp2 = client.put(
+    good_resp2 = client.patch(
         USER_API_ROUTE,
         headers = headers,
         data = dumps({
@@ -136,7 +136,7 @@ def test_user_put(
     assert good_resp2.status_code == 200
     assert good_resp2.get_json()['msg'] == 'Success'
     
-    good_resp3 = client.put(
+    good_resp3 = client.patch(
         USER_API_ROUTE,
         headers = headers,
         data = dumps({
@@ -153,5 +153,4 @@ def test_user_delete(client: FlaskClient, headers: dict[str, str]) -> None:
         USER_API_ROUTE,
         headers = headers
     )
-    assert good_resp.status_code == 200
-    assert good_resp.get_json()['msg'] == 'Success'
+    assert good_resp.status_code == 204

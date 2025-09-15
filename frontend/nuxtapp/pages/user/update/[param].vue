@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { accessUserPatch } from '~/composables/ApiClient'
+
   const param: string = useRoute().params.param as string ?? ''
 
   if (!['email', 'password', 'name'].includes(param)) {
@@ -31,14 +33,14 @@
   ])
 
   async function tryUpdateUser(): Promise<void> {
-    const resp: Resp = await accessUserPut(
+    const resp: Resp = await accessUserPatch(
       param, inputs.value[0].value, inputs.value[1].value
     )
     if (resp.status === 200) {
       useRouter().push({name: 'user-info'})
     }
     else {
-      useAlertStore().showMessage(resp.json.msg)
+      useAlertStore().showMessage(resp.body.msg)
     }
   }
 </script>

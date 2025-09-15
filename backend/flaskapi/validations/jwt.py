@@ -12,10 +12,12 @@ class JWTPost(BaseModel):
     email: str
     password: str
 
-    @field_validator('email')
+    @field_validator('email', mode='after')
+    @classmethod
     def email_validator(cls: Self, val: str) -> str:
         return validate_email(val)
-    
-    @field_validator('password')
+
+    @field_validator('password', mode='after')
+    @classmethod
     def password_validator(cls: Self, val: str) -> str:
         return validate_password(val)

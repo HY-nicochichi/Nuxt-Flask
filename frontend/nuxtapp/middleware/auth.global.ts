@@ -3,7 +3,7 @@ export default defineNuxtRouteMiddleware(async(to, from) => {
   const resp: Resp = await accessUserGet()
 
   if (resp.status === 200) {
-    user.loginUser(resp.json.email, resp.json.name)
+    user.loginUser(resp.body.email, resp.body.name)
   }
   else {
     user.clear()

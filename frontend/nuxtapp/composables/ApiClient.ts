@@ -23,9 +23,9 @@ function postOptions(json: any): RequestInit {
   }
 }
 
-function putOptions(json: any): RequestInit {
+function patchOptions(json: any): RequestInit {
   return {
-    method: 'PUT',
+    method: 'PATCH',
     mode: 'cors',
     headers: {
       'Content-Type': 'application/json',
@@ -55,13 +55,13 @@ async function apiRequest(
     )
     return {
       status: response.status,
-      json: await response.json()
+      body: response.status === 204 ? '' : await response.json()
     }
   }
   catch(error) {
     return {
       status: 500,
-      json: {'msg': 'API access failed'}
+      body: {'msg': 'API access failed'}
     }
   }
 }
@@ -95,11 +95,11 @@ async function accessUserPost(
   )
 }
 
-async function accessUserPut(
+async function accessUserPatch(
   param: string, current_val: string, new_val: string
 ): Promise<Resp> {
   return apiRequest(
-    user_api_route, putOptions({
+    user_api_route, patchOptions({
       param: param,
       current_val: current_val, 
       new_val: new_val
@@ -115,5 +115,5 @@ async function accessUserDelete(): Promise<Resp> {
 
 export {
   accessJwtPost,
-  accessUserGet, accessUserPost, accessUserPut, accessUserDelete
+  accessUserGet, accessUserPost, accessUserPatch, accessUserDelete
 }

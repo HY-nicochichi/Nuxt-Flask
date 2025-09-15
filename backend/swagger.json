@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Flask REST-API",
-    "version": "1.1.1"
+    "version": "1.1.2"
   },
   "components": {
     "securitySchemes": {
@@ -134,8 +134,8 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Success",
+          "201": {
+            "description": "Created",
             "content": {
               "application/json": {
                 "schema": {
@@ -152,7 +152,7 @@
           }
         }
       },
-      "put": {
+      "patch": {
         "tags": [
           "User API"
         ],
@@ -217,21 +217,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "msg": {
-                      "type": "string",
-                      "example": "Success"
-                    }
-                  }
-                }
-              }
-            }
+          "204": {
+            "description": "No Content"
           }
         }
       }

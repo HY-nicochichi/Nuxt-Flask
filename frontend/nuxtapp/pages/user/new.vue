@@ -32,15 +32,15 @@
     const resp1: Resp = await accessUserPost(
       inputs.value[0].value, inputs.value[1].value, inputs.value[2].value
     )
-    if (resp1.status === 200) {
+    if (resp1.status === 201) {
       const resp2: Resp = await accessJwtPost(
         inputs.value[0].value, inputs.value[1].value
       )
-      setJwt(resp2.json.access_token)
+      setJwt(resp2.body.access_token)
       useRouter().push({name: 'index'})
     }
     else {
-      useAlertStore().showMessage(resp1.json.msg)
+      useAlertStore().showMessage(resp1.body.msg)
     }
   }
 </script>

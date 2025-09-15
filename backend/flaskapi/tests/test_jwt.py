@@ -19,25 +19,31 @@ def test_jwt_post(
     bad_resp1 = client.post(
         JWT_API_ROUTE,
         data = dumps({
-            'email': user.email, 'password': password
+            'email': user.email,
+            'password': password
         })
     )
     assert bad_resp1.status_code == 400
-    assert bad_resp1.get_json()['msg'] == 'Invalid Content-Type header or JSON body'
+    assert bad_resp1.get_json()['msg'] == 'Invalid Content-Type header or JSON body syntax'
     
     bad_resp2 = client.post(
         JWT_API_ROUTE,
         headers = headers,
-        data = dumps({'email': user.email})
+        data = dumps({
+            'email': user.email,
+            'password': 'invalid'
+        })
     )
-    assert bad_resp2.status_code == 400
-    assert bad_resp2.get_json()['msg'] == 'Invalid Content-Type header or JSON body'
+    assert bad_resp2.status_code == 422
+    assert bad_resp2.get_json()['msg'] == 'JSON body validation failed'
+    assert bad_resp2.get_json()['detail'][0]['loc'] == ['password']
     
     bad_resp3 = client.post(
         JWT_API_ROUTE,
         headers = headers,
         data = dumps({
-           'email': 'jiro@email.com', 'password': password
+            'email': 'jiro@email.com',
+            'password': password
         })
     )
     assert bad_resp3.status_code == 401
@@ -47,7 +53,8 @@ def test_jwt_post(
         JWT_API_ROUTE,
         headers = headers,
         data = dumps({
-            'email': user.email, 'password': 'Jiro1234'
+            'email': user.email,
+            'password': 'Jiro1234'
         })
     )
     assert bad_resp4.status_code == 401
@@ -57,7 +64,8 @@ def test_jwt_post(
         JWT_API_ROUTE,
         headers = headers,
         data = dumps({
-            'email': user.email, 'password': password
+            'email': user.email,
+            'password': password
         })
     )
     assert good_resp.status_code == 200

@@ -3,9 +3,11 @@
 
   async function confirmDeleteUser(): Promise<void> {
     if (confirm('Comfirm user deletion?')) {
-      await accessUserDelete()
-      setJwt()
-      useRouter().push({name: 'index'})
+      const resp = await accessUserDelete()
+      if (resp.status === 204) {
+        setJwt()
+        useRouter().push({name: 'index'})
+      }
     }
   }
 </script>

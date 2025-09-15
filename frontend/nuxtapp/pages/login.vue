@@ -27,13 +27,13 @@
       inputs.value[0].value, inputs.value[1].value
     )
     if (resp.status === 200) {
-      setJwt(resp.json.access_token)
+      setJwt(resp.body.access_token)
       useRouter().push({name: 'index'})
     }
     else {
-      useAlertStore().showMessage(resp.json.msg)
+      useAlertStore().showMessage(resp.body.msg)
     }
-  } 
+  }
 </script>
 
 <template>

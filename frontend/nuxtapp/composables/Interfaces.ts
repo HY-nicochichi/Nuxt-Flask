@@ -1,6 +1,6 @@
 interface Resp {
   status: number
-  json: any
+  body: any
 }
 
 interface User {

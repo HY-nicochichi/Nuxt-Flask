@@ -4,8 +4,8 @@ from typing import (
 )
 from pydantic import (
     BaseModel,
-    ValidationInfo,
-    field_validator
+    field_validator,
+    model_validator
 )
 from . import (
     validate_email,
@@ -18,35 +18,36 @@ class UserPost(BaseModel):
     password: str
     name: str
 
-    @field_validator('email')
+    @field_validator('email', mode='after')
+    @classmethod
     def email_validator(cls: Self, val: str) -> str:
         return validate_email(val)
     
-    @field_validator('password')
+    @field_validator('password', mode='after')
+    @classmethod
     def password_validator(cls: Self, val: str) -> str:
         return validate_password(val)
+    
+    @field_validator('name', mode='after')
+    @classmethod
+    def name_validator(cls: Self, val: str) -> str:
+        return validate_name(val)
 
-class UserPut(BaseModel):
+class UserPatch(BaseModel):
     param: Literal['email', 'password', 'name']
     current_val: str
     new_val: str
 
-    @field_validator('current_val')
-    def current_val_validator(cls: Self, val: str, info: ValidationInfo) -> str:
-        match info.data.get('param'):
+    @model_validator(mode='after')
+    def user_patch_validator(self: Self) -> Self:
+        match self.param:
             case 'email':
-                return validate_email(val)
+                validate_email(self.current_val)
+                validate_email(self.new_val)
             case 'password':
-                return validate_password(val)
+                validate_password(self.current_val)
+                validate_password(self.new_val)
             case 'name':
-                return validate_name(val)
-    
-    @field_validator('new_val')
-    def new_val_validator(cls: Self, val: str, info: ValidationInfo) -> str:
-        match info.data.get('param'):
-            case 'email':
-                return validate_email(val)
-            case 'password':
-                return validate_password(val)
-            case 'name':
-                return validate_name(val)
+                validate_name(self.current_val)
+                validate_name(self.new_val)
+        return self
