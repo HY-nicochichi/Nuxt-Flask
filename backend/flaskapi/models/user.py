@@ -18,12 +18,12 @@ class User(db_orm.Model):
 
     @classmethod
     def search_by_id(cls: Self, id: str) -> Self|None:
-        return db_orm.session.scalar(select(cls).where(cls.id == id))
+        return db_orm.session.scalars(select(cls).where(cls.id == id)).one_or_none()
 
     @classmethod
     def search_by_email(cls: Self, email: str) -> Self|None:
-        return db_orm.session.scalar(select(cls).where(cls.email == email))
-    
+        return db_orm.session.scalars(select(cls).where(cls.email == email)).one_or_none()
+
     @classmethod
     def create(cls: Self, email: str, password: str, name: str) -> Self|None:
         if cls.search_by_email(email):
