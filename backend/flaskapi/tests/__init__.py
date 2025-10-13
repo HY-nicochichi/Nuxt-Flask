@@ -7,7 +7,8 @@ from views import bps
 from extensions import (
     db_orm,
     jwt_manager,
-    cross_origin
+    cross_origin,
+    db_transaction
 )
 
 @fixture(scope='function')
@@ -28,6 +29,7 @@ def app():
 
     with app.app_context():
         db_orm.create_all()
+        db_orm.session.remove()
 
     yield app
 
@@ -46,7 +48,8 @@ def password():
 @fixture(scope='function')
 def user(app: Flask, password: str):
     with app.app_context():
-        user = User.create('taro@email.com', password, 'Taro')
+        with db_transaction():
+            user = User.create('taro@email.com', password, 'Taro')
         db_orm.session.refresh(user)
     return user
 

@@ -36,7 +36,6 @@ class User(db_orm.Model):
                 name = name
             )
             db_orm.session.add(user)
-            db_orm.session.commit()
             return user
 
     def is_password_matched(self: Self, password: str) -> bool:
@@ -44,16 +43,12 @@ class User(db_orm.Model):
 
     def update_email(self: Self, email: str) -> None:
         self.email = email
-        db_orm.session.commit()
 
     def update_password(self: Self, password: str) -> None:
         self.password_hash = generate_password_hash(password)
-        db_orm.session.commit()
     
     def update_name(self: Self, name: str) -> None:
         self.name = name
-        db_orm.session.commit()
 
     def delete(self: Self) -> None:
         db_orm.session.delete(self)
-        db_orm.session.commit()
