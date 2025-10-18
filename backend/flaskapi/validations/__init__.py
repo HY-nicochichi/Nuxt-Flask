@@ -19,10 +19,12 @@ def validate_json(func):
             DataModel: Type[BaseModel] = func.__annotations__['data']
             data = DataModel.model_validate(request.get_json())
             return func(data, *args, **kwargs)
-        except (BadRequest, UnsupportedMediaType):
-            return {'msg': 'Invalid Content-Type header or JSON body syntax'}, 400
+        except UnsupportedMediaType:
+            return {'msg': 'Invalid Content-Type header'}, 415
+        except BadRequest:
+            return {'msg': 'Invalid JSON body syntax'}, 400
         except ValidationError as e:
-            return {'msg': 'JSON body validation failed', 'detail': e.errors()}, 422
+            return {'validation_error': e.errors()}, 422
     return wrapped
 
 def validate_email(val: str) -> str:

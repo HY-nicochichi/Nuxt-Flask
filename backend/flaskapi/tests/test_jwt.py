@@ -23,10 +23,18 @@ def test_jwt_post(
             'password': password
         })
     )
-    assert bad_resp1.status_code == 400
-    assert bad_resp1.get_json()['msg'] == 'Invalid Content-Type header or JSON body syntax'
-    
+    assert bad_resp1.status_code == 415
+    assert bad_resp1.get_json()['msg'] == 'Invalid Content-Type header'
+
     bad_resp2 = client.post(
+        JWT_API_ROUTE,
+        headers = headers,
+        data = 'invalid'
+    )
+    assert bad_resp2.status_code == 400
+    assert bad_resp2.get_json()['msg'] == 'Invalid JSON body syntax'
+    
+    bad_resp3 = client.post(
         JWT_API_ROUTE,
         headers = headers,
         data = dumps({
@@ -34,11 +42,10 @@ def test_jwt_post(
             'password': 'invalid'
         })
     )
-    assert bad_resp2.status_code == 422
-    assert bad_resp2.get_json()['msg'] == 'JSON body validation failed'
-    assert bad_resp2.get_json()['detail'][0]['loc'] == ['password']
+    assert bad_resp3.status_code == 422
+    assert bad_resp3.get_json()['validation_error'][0]['loc'] == ['password']
     
-    bad_resp3 = client.post(
+    bad_resp4 = client.post(
         JWT_API_ROUTE,
         headers = headers,
         data = dumps({
@@ -46,10 +53,10 @@ def test_jwt_post(
             'password': password
         })
     )
-    assert bad_resp3.status_code == 401
-    assert bad_resp3.get_json()['msg'] == 'Invalid email or password'
+    assert bad_resp4.status_code == 401
+    assert bad_resp4.get_json()['msg'] == 'Invalid email or password'
     
-    bad_resp4 = client.post(
+    bad_resp5 = client.post(
         JWT_API_ROUTE,
         headers = headers,
         data = dumps({
@@ -57,8 +64,8 @@ def test_jwt_post(
             'password': 'Jiro1234'
         })
     )
-    assert bad_resp4.status_code == 401
-    assert bad_resp4.get_json()['msg'] == 'Invalid email or password'
+    assert bad_resp5.status_code == 401
+    assert bad_resp5.get_json()['msg'] == 'Invalid email or password'
     
     good_resp = client.post(
         JWT_API_ROUTE,
