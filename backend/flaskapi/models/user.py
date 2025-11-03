@@ -1,5 +1,4 @@
 from typing import Self
-from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.orm import (
     Mapped,
@@ -9,28 +8,26 @@ from werkzeug.security import (
     generate_password_hash,
     check_password_hash
 )
-from extensions import db_orm
+from extensions import (
+    db_orm,
+    Model
+)
 
-class User(db_orm.Model):
+class User(Model):
     email: Mapped[str] = mapped_column(unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(nullable=False)
     name: Mapped[str] = mapped_column(nullable=False)
 
     @classmethod
-    def search_by_id(cls: Self, id: str) -> Self|None:
-        return db_orm.session.scalars(select(cls).where(cls.id == id)).one_or_none()
-
-    @classmethod
-    def search_by_email(cls: Self, email: str) -> Self|None:
+    def search_by_email(cls, email: str) -> Self|None:
         return db_orm.session.scalars(select(cls).where(cls.email == email)).one_or_none()
 
     @classmethod
-    def create(cls: Self, email: str, password: str, name: str) -> Self|None:
+    def create(cls, email: str, password: str, name: str) -> Self|None:
         if cls.search_by_email(email):
             return None
         else:
             user = cls(
-                id = str(uuid4()),
                 email = email,
                 password_hash = generate_password_hash(password),
                 name = name
@@ -38,17 +35,14 @@ class User(db_orm.Model):
             db_orm.session.add(user)
             return user
 
-    def is_password_matched(self: Self, password: str) -> bool:
+    def is_password_matched(self, password: str) -> bool:
         return check_password_hash(self.password_hash, password)
 
-    def update_email(self: Self, email: str) -> None:
+    def update_email(self, email: str) -> None:
         self.email = email
 
-    def update_password(self: Self, password: str) -> None:
+    def update_password(self, password: str) -> None:
         self.password_hash = generate_password_hash(password)
     
-    def update_name(self: Self, name: str) -> None:
+    def update_name(self, name: str) -> None:
         self.name = name
-
-    def delete(self: Self) -> None:
-        db_orm.session.delete(self)

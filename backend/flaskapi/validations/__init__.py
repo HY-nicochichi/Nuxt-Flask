@@ -28,25 +28,25 @@ def validate_json(func):
     return wrapped
 
 def validate_email(val: str) -> str:
-    if not fullmatch(r'^(?=.{10,32}$)[a-z0-9.-]+@[a-z0-9-]+\.[a-z0-9.-]+$', val):
+    if not fullmatch(r'^(?=.{10,50}$)[a-z0-9.-]+@[a-z0-9-]+\.[a-z0-9.-]+$', val):
         raise PydanticCustomError(
             'value_error',
-            'Email must be 10-32 characters and a standard email format'
+            'Email must be 10-50 characters and a standard email format'
         )
     return val
 
 def validate_password(val: str) -> str:
-    if not fullmatch(r'(?=.{8,16})(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])[a-zA-Z0-9]+', val):
+    if not fullmatch(r'^(?=.{8,20}$)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])[a-zA-Z0-9]+$', val):
         raise PydanticCustomError(
             'value_error',
-            'Password must be 8-16 characters and include at least 1 uppercase, 1 lowercase, and 1 number'
+            'Password must be 8-20 characters and include uppercase, lowercase, and number'
         )
     return val
 
 def validate_name(val: str) -> str:
-    if not fullmatch(r'.{1,16}', val):
+    if not fullmatch(r'^.{1,30}$', val):
         raise PydanticCustomError(
             'value_error',
-            'Name must be 1-16 characters'
+            'Name must be 1-30 characters'
         )
     return val

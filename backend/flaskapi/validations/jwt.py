@@ -1,4 +1,3 @@
-from typing import Self
 from pydantic import (
     BaseModel,
     field_validator
@@ -14,10 +13,10 @@ class JWTPost(BaseModel):
 
     @field_validator('email', mode='after')
     @classmethod
-    def email_validator(cls: Self, val: str) -> str:
+    def email_validator(cls, val: str) -> str:
         return validate_email(val)
 
     @field_validator('password', mode='after')
     @classmethod
-    def password_validator(cls: Self, val: str) -> str:
+    def password_validator(cls, val: str) -> str:
         return validate_password(val)
