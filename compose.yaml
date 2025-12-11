@@ -2,9 +2,9 @@ services:
 
   database:
     container_name: nuxt-flask-database
-    build: ./database
-    env_file: [./database/.env]
-    volumes: [volume:/var/lib/postgresql/data]
+    image: postgres:18.1-alpine
+    env_file: [database.env]
+    expose: [5432]
     healthcheck:
       test: [CMD-SHELL, pg_isready -U postgres]
       interval: 2s
@@ -14,8 +14,8 @@ services:
 
   backend:
     container_name: nuxt-flask-backend
-    build: ./backend
-    env_file: [./backend/.env]
+    build: backend
+    env_file: [backend.env]
     ports: [5000:5000]
     depends_on:
       database:
@@ -23,11 +23,8 @@ services:
 
   frontend:
     container_name: nuxt-flask-frontend
-    build: ./frontend
+    build: frontend
     ports: [8080:8080]
     depends_on:
       backend:
         condition: service_started
-
-volumes:
-  volume:
