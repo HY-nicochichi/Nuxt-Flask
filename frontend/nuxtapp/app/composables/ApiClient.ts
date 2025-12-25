@@ -1,3 +1,6 @@
+import {getJwt} from '~/composables/JwtManager'
+import type {Resp} from '~/types'
+
 const jwt_api_route: string = '/jwt/'
 const user_api_route: string = '/user/'
 

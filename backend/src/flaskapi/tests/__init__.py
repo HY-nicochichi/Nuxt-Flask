@@ -15,10 +15,9 @@ from extensions import (
 def app():
     app = Flask('test')
 
-    app.config.from_pyfile('/flaskapi/settings.py')
+    app.config.from_pyfile('/src/flaskapi/settings.py')
     app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(seconds=7.0)
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(seconds=3.0)
 
     for bp in bps:
         app.register_blueprint(bp)

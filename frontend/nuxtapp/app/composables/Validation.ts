@@ -1,3 +1,5 @@
+import type {Validation} from '~/types'
+
 function validateEmail(val: string): boolean {
   return /^(?=.{10,50}$)[a-z0-9.-]+@[a-z0-9-]+\.[a-z0-9.-]+$/.test(val)
 }

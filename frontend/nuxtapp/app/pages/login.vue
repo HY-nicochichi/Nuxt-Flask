@@ -1,4 +1,12 @@
 <script setup lang="ts">
+  import AlertBox from '~/components/AlertBox.vue'
+  import BasicForm from '~/components/BasicForm.vue'
+  import {accessJwtPost} from '~/composables/ApiClient'
+  import {setJwt} from '~/composables/JwtManager'
+  import {validateEmail, validatePassword} from '~/composables/Validation'
+  import {useAlertStore} from '~/stores/AlertStore'
+  import type {Input, Resp} from '~/types'
+
   useHead({title: 'login'})
 
   const inputValues: Ref<string[]> = ref(['', ''])
@@ -11,20 +19,20 @@
     {
       label: 'email',
       type: 'text',
-      value: inputValues.value[0],
+      value: inputValues.value[0] ?? '',
       validation: validateEmail
     },
     {
       label: 'password',
       type: 'password',
-      value: inputValues.value[1],
+      value: inputValues.value[1] ?? '',
       validation: validatePassword
     }
   ])
 
   async function tryLogin(): Promise<void> {
     const resp: Resp = await accessJwtPost(
-      inputs.value[0].value, inputs.value[1].value
+      inputs.value[0]?.value ?? '', inputs.value[1]?.value ?? ''
     )
     if (resp.status === 200) {
       setJwt(resp.body.access_token)
@@ -35,6 +43,7 @@
     }
   }
 </script>
+
 
 <template>
   <AlertBox/>

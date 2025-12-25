@@ -40,7 +40,7 @@ def test_user_get(app: Flask, client: FlaskClient, user: User) -> None:
     assert good_resp.get_json()['email'] == user.email
     assert good_resp.get_json()['name'] == user.name
     
-    sleep(7.0)
+    sleep(3.0)
     bad_resp3 = client.get(
         USER_API_ROUTE,
         headers = {'Authorization': f'Bearer {good_jwt}'}

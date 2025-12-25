@@ -1,4 +1,7 @@
 <script setup lang="ts">
+  import {setJwt} from '~/composables/JwtManager'
+  import {useUserStore} from '~/stores/UserStore'
+
   function tryLogout(): void {
     setJwt()
     if (useRoute().name === 'index') {
@@ -8,6 +11,7 @@
     }
   }
 </script>
+
 
 <template>
   <div class="pt-3">

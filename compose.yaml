@@ -3,10 +3,14 @@ services:
   database:
     container_name: nuxt-flask-database
     image: postgres:18.1-alpine
-    env_file: [database.env]
-    expose: [5432]
+    env_file: 
+      - database.env
+    expose: 
+      - 5432
     healthcheck:
-      test: [CMD-SHELL, pg_isready -U postgres]
+      test: 
+        - CMD-SHELL
+        - pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
       interval: 2s
       timeout: 3s
       retries: 3
@@ -14,17 +18,26 @@ services:
 
   backend:
     container_name: nuxt-flask-backend
-    build: backend
-    env_file: [backend.env]
-    ports: [5000:5000]
+    build:
+      context: ./backend
+      args: 
+        - TEST_MODE=${TEST_MODE:-lax}
+    env_file: 
+      - backend.env
+    ports: 
+      - 5000:5000
     depends_on:
       database:
         condition: service_healthy
 
   frontend:
     container_name: nuxt-flask-frontend
-    build: frontend
-    ports: [8080:8080]
+    build:
+      context: ./frontend
+      args: 
+        - TEST_MODE=${TEST_MODE:-lax}
+    ports: 
+      - 8080:8080
     depends_on:
       backend:
         condition: service_started

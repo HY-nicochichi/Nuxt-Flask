@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { accessUserPatch } from '~/composables/ApiClient'
+  import AlertBox from '~/components/AlertBox.vue'
+  import BasicForm from '~/components/BasicForm.vue'
+  import {accessUserPatch} from '~/composables/ApiClient'
+  import {selectValidation} from '~/composables/Validation'
+  import {useAlertStore} from '~/stores/AlertStore'
+  import type {Input, Resp} from '~/types'
 
   const param: string = useRoute().params.param as string ?? ''
 
@@ -21,20 +26,20 @@ import { accessUserPatch } from '~/composables/ApiClient'
     {
       label: 'current ' + param,
       type: type,
-      value: inputValues.value[0],
+      value: inputValues.value[0] ?? '',
       validation: selectValidation(param)
     },
     {
       label: 'new ' + param,
       type: type,
-      value: inputValues.value[1],
+      value: inputValues.value[1] ?? '',
       validation: selectValidation(param)
     }
   ])
 
   async function tryUpdateUser(): Promise<void> {
     const resp: Resp = await accessUserPatch(
-      param, inputs.value[0].value, inputs.value[1].value
+      param, inputs.value[0]?.value ?? '', inputs.value[1]?.value ?? ''
     )
     if (resp.status === 200) {
       useRouter().push({name: 'user-info'})
@@ -44,6 +49,7 @@ import { accessUserPatch } from '~/composables/ApiClient'
     }
   }
 </script>
+
 
 <template>
   <AlertBox/>

@@ -1,4 +1,8 @@
 <script setup lang="ts">
+  import {accessUserDelete} from '~/composables/ApiClient'
+  import {setJwt} from '~/composables/JwtManager'
+  import {useUserStore} from '~/stores/UserStore'
+
   useHead({title: 'user info'})
 
   async function confirmDeleteUser(): Promise<void> {
@@ -11,6 +15,7 @@
     }
   }
 </script>
+
 
 <template>
   <h4 class="fw-bolder mb-3">user info</h4>

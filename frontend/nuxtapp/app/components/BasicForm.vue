@@ -1,4 +1,6 @@
 <script setup lang="ts">
+  import type {Input} from '~/types'
+
   const props = defineProps({
     inputs: {type: Array<Input>, required: true}
   })
@@ -9,6 +11,7 @@
 
   const emit = defineEmits(['update', 'submit'])
 </script>
+
 
 <template>
   <div class="col-sm-9 col-md-7 col-lg-5 border border-primary bg-light p-3">

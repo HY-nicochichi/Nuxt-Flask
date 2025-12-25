@@ -1,3 +1,5 @@
+import type {User} from '~/types'
+
 export const useUserStore = defineStore('user', () => {
   const value: Ref<User> = ref({
     login: false, email: '', name: ''
@@ -15,5 +17,5 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  return { value, loginUser, clear }
+  return {value, loginUser, clear}
 })

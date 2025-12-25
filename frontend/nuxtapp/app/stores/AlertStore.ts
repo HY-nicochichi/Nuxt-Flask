@@ -1,3 +1,5 @@
+import type {Alert} from '~/types'
+
 export const useAlertStore = defineStore('alert', () => {
   const value: Ref<Alert> = ref({
     show: false, msg: ''
@@ -15,5 +17,5 @@ export const useAlertStore = defineStore('alert', () => {
     }
   }
 
-  return { value, showMessage, clear }
+  return {value, showMessage, clear}
 })

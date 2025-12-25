@@ -1,25 +1,18 @@
 export default defineNuxtConfig({
-  compatibilityDate: '2025-05-15',
-  devtools: { enabled: true },
+  compatibilityDate: '2025-07-15',
+  devtools: {enabled: true},
   ssr: false,
-  modules: [
-    '@pinia/nuxt'
-  ],
-  imports: {
-    dirs: ["stores"],
-  },
+  modules: ['@pinia/nuxt'],
   app: {
     head: {
-      htmlAttrs: {
-        lang: 'en'
-      },
+      htmlAttrs: {lang: 'en'},
       meta: [
-        { charset: 'utf-8' },
-        { 'http-equiv': 'X-UA-Compatible', content: 'IE=edge' },
-        { name: 'viewport', content: 'width=device-width,initial-scale=1.0' }
+        {charset: 'utf-8'},
+        {'http-equiv': 'X-UA-Compatible', content: 'IE=edge'},
+        {name: 'viewport', content: 'width=device-width,initial-scale=1.0'}
       ],
       link: [
-        { rel: 'icon', href: './favicon.ico' },
+        {rel: 'icon', href: './favicon.ico'},
         {
           rel: 'stylesheet',
           href: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
