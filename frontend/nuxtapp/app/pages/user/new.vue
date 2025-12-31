@@ -4,10 +4,13 @@
   import {accessJwtPost, accessUserPost} from '~/composables/ApiClient'
   import {setJwt} from '~/composables/JwtManager'
   import {validateEmail, validateName, validatePassword} from '~/composables/Validation'
-  import {useAlertStore} from '~/stores/AlertStore'
+  import {useAlertStore} from '~/stores'
   import type {Input, Resp} from '~/types'
 
   useHead({title: 'new user'})
+
+  const router = useRouter()
+  const alert = useAlertStore()
 
   const inputValues: Ref<string[]> = ref(['', '', ''])
 
@@ -36,7 +39,7 @@
     }
   ])
 
-  async function tryCreateUser(): Promise<void> {
+  async function createUser(done: () => void): Promise<void> {
     const resp1: Resp = await accessUserPost(
       inputs.value[0]?.value ?? '', inputs.value[1]?.value ?? '', inputs.value[2]?.value ?? ''
     )
@@ -45,10 +48,11 @@
         inputs.value[0]?.value ?? '', inputs.value[1]?.value ?? ''
       )
       setJwt(resp2.body.access_token)
-      useRouter().push({name: 'index'})
+      router.push({name: 'index'})
     }
     else {
-      useAlertStore().showMessage(resp1.body.msg)
+      alert.show(resp1.body.msg)
+      done()
     }
   }
 </script>
@@ -58,8 +62,8 @@
   <AlertBox/>
   <h4 class="fw-bolder mb-3">new user</h4>
   <BasicForm
-    v-bind:inputs="inputs"
-    v-on:update="setInputValue"
-    v-on:submit="tryCreateUser"
+    :inputs="inputs"
+    @update="setInputValue"
+    @submit="createUser"
   />
 </template>

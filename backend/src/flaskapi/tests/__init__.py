@@ -17,7 +17,7 @@ def app():
 
     app.config.from_pyfile('/src/flaskapi/settings.py')
     app.config['TESTING'] = True
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(seconds=3.0)
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(seconds=1.0)
 
     for bp in bps:
         app.register_blueprint(bp)

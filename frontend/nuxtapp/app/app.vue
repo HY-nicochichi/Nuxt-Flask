@@ -4,8 +4,13 @@
 
 
 <template>
-  <NavBar/>
-  <div class="p-3">
-    <NuxtPage/>
+  <div class="bg-black text-white min-vh-100">
+    <NuxtLoadingIndicator
+      color="deeppink" :height="5"
+    />
+    <NavBar/>
+    <div class="p-3">
+      <NuxtPage/>
+    </div>
   </div>
 </template>

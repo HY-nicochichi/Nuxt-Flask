@@ -13,144 +13,168 @@ from . import (
     headers
 )
 
-USER_API_ROUTE = '/user/'
+USER_API_ROUTE: str = '/user/'
 
-def test_user_get(app: Flask, client: FlaskClient, user: User) -> None:
-    bad_id = str(uuid4())
-    with app.app_context():
-        bad_jwt: str = create_access_token(bad_id)
-        good_jwt: str = create_access_token(user.id)
-    
-    bad_resp1 = client.get(USER_API_ROUTE)
-    assert bad_resp1.status_code == 401
-    assert bad_resp1.get_json()['msg'] == 'Missing Authorization Header'
-    
-    bad_resp2 = client.get(
-        USER_API_ROUTE,
-        headers = {'Authorization': f'Bearer {bad_jwt}'}
-    )
-    assert bad_resp2.status_code == 401
-    assert bad_resp2.get_json()['msg'] == f'Error loading the user {bad_id}'
-    
-    good_resp = client.get(
-        USER_API_ROUTE,
-        headers = {'Authorization': f'Bearer {good_jwt}'}
-    )
-    assert good_resp.status_code == 200
-    assert good_resp.get_json()['email'] == user.email
-    assert good_resp.get_json()['name'] == user.name
-    
-    sleep(3.0)
-    bad_resp3 = client.get(
-        USER_API_ROUTE,
-        headers = {'Authorization': f'Bearer {good_jwt}'}
-    )
-    assert bad_resp3.status_code == 401
-    assert bad_resp3.get_json()['msg'] == 'Token has expired'
+class TestUserGet:
+    def test_未ログイン時は401エラーになること(
+        self, client: FlaskClient
+    ) -> None:
+        resp = client.get(USER_API_ROUTE)
+        assert resp.status_code == 401
+        assert resp.get_json()['msg'] == 'Missing Authorization Header'
+  
+    def test_存在しないユーザーのトークンの場合は401エラーになること(
+        self, app: Flask, client: FlaskClient
+    ) -> None:
+        bad_id: str = str(uuid4())
+        with app.app_context():
+            bad_jwt: str = create_access_token(bad_id)
+        resp = client.get(
+            USER_API_ROUTE,
+            headers = {'Authorization': f'Bearer {bad_jwt}'}
+        )
+        assert resp.status_code == 401
+        assert resp.get_json()['msg'] == f'Error loading the user {bad_id}'
 
-def test_user_post(client: FlaskClient, user: User, headers: dict[str, str]) -> None:
-    bad_resp = client.post(
-        USER_API_ROUTE,
-        headers = headers,
-        data = dumps({
-            'email': user.email,
-            'password': 'Jiro1234',
-            'name': 'Jiro'
-        })
-    )
-    assert bad_resp.status_code == 409
-    assert bad_resp.get_json()['msg'] == 'Email already taken'
+    def test_正しいトークンでユーザー情報を取得できること(
+        self, app: Flask, client: FlaskClient, user: User
+    ) -> None:
+        with app.app_context():
+            good_jwt: str = create_access_token(user.id)
+        resp = client.get(
+            USER_API_ROUTE,
+            headers = {'Authorization': f'Bearer {good_jwt}'}
+        )
+        assert resp.status_code == 200
+        assert resp.get_json()['email'] == user.email
+        assert resp.get_json()['name'] == user.name
 
-    good_resp = client.post(
-        USER_API_ROUTE,
-        headers = headers,
-        data = dumps({
-            'email': 'jiro@email.com',
-            'password': 'Jiro1234',
-            'name': 'Jiro'
-        })
-    )
-    assert good_resp.status_code == 201
-    assert good_resp.get_json()['msg'] == 'Success'
+    def test_有効期限が切れたトークンの場合は401エラーになること(
+        self, app: Flask, client: FlaskClient, user: User
+    ) -> None:
+        with app.app_context():
+            good_jwt: str = create_access_token(user.id)
+        sleep(1.0)
+        resp = client.get(
+            USER_API_ROUTE,
+            headers = {'Authorization': f'Bearer {good_jwt}'}
+        )
+        assert resp.status_code == 401
+        assert resp.get_json()['msg'] == 'Token has expired'
 
-def test_user_patch(
-    client: FlaskClient, password: str, user: User, headers: dict[str, str]
-) -> None:
-    bad_resp1 = client.patch(
-        USER_API_ROUTE,
-        headers = headers,
-        data = dumps({
-            'param': 'email',
-            'current_val': 'jiro@email.com',
-            'new_val': 'jiro@email.com'
-        })
-    )
-    assert bad_resp1.status_code == 400
-    assert bad_resp1.get_json()['msg'] == 'Invalid current value'
-   
-    bad_resp2 = client.patch(
-        USER_API_ROUTE,
-        headers = headers,
-        data = dumps({
-            'param': 'email',
-            'current_val': user.email,
-            'new_val': user.email
-        })
-    )
-    assert bad_resp2.status_code == 409
-    assert bad_resp2.get_json()['msg'] == 'New value already taken'
-    
-    good_resp1 = client.patch(
-        USER_API_ROUTE,
-        headers = headers,
-        data = dumps({
-            'param': 'email',
-            'current_val': user.email,
-            'new_val': 'jiro@email.com'
-        })
-    )
-    assert good_resp1.status_code == 200
-    assert good_resp1.get_json()['msg'] == 'Success'
-    
-    bad_resp3 = client.patch(
-        USER_API_ROUTE,
-        headers = headers,
-        data = dumps({
-            'param': 'password',
-            'current_val': 'Jiro1234',
-            'new_val': 'Jiro1234'
-        })
-    )
-    assert bad_resp3.status_code == 400
-    assert bad_resp3.get_json()['msg'] == 'Invalid current value'
-    
-    good_resp2 = client.patch(
-        USER_API_ROUTE,
-        headers = headers,
-        data = dumps({
-            'param': 'password',
-            'current_val': password,
-            'new_val': 'Jiro1234'
-        })
-    )
-    assert good_resp2.status_code == 200
-    assert good_resp2.get_json()['msg'] == 'Success'
-    
-    good_resp3 = client.patch(
-        USER_API_ROUTE,
-        headers = headers,
-        data = dumps({
-            'param': 'name',
-            'current_val': user.name,
-            'new_val': 'Jiro'
-        })
-    )
-    assert good_resp3.status_code == 200
-    assert good_resp3.get_json()['msg'] == 'Success'
+class TestUserPost:
+    def test_既に登録済みのメールアドレスの場合は409エラーになること(
+        self, client: FlaskClient, user: User, headers: dict[str, str]
+    ) -> None:
+        resp = client.post(
+            USER_API_ROUTE,
+            headers = headers,
+            data = dumps({
+                'email': user.email,
+                'password': 'Jiro1234',
+                'name': 'Jiro'
+            })
+        )
+        assert resp.status_code == 409
+        assert resp.get_json()['msg'] == 'Email already taken'
 
-def test_user_delete(client: FlaskClient, headers: dict[str, str]) -> None:
-    good_resp = client.delete(
-        USER_API_ROUTE,
-        headers = headers
-    )
-    assert good_resp.status_code == 204
+    def test_新しいメールアドレスなら201で登録成功すること(
+        self, client: FlaskClient, headers: dict[str, str]
+    ) -> None:
+        resp = client.post(
+            USER_API_ROUTE,
+            headers = headers,
+            data = dumps({
+                'email': 'jiro@email.com',
+                'password': 'Jiro1234',
+                'name': 'Jiro'
+            })
+        )
+        assert resp.status_code == 201
+        assert resp.get_json()['msg'] == 'Success'
+
+class TestUserPatch:
+    def test_現在の値が正しくない場合は400エラーになること(
+        self, client: FlaskClient, headers: dict[str, str]
+    ) -> None:
+        resp = client.patch(
+            USER_API_ROUTE,
+            headers = headers,
+            data = dumps({
+                'param': 'email',
+                'current_val': 'jiro@email.com',
+                'new_val': 'jiro@email.com'
+            })
+        )
+        assert resp.status_code == 400
+        assert resp.get_json()['msg'] == 'Invalid current value'
+
+    def test_新しい値が既に使われている場合は409エラーになること(
+        self, client: FlaskClient, user: User, headers: dict[str, str]
+    ) -> None:
+        resp = client.patch(
+            USER_API_ROUTE,
+            headers = headers,
+            data = dumps({
+                'param': 'email',
+                'current_val': user.email,
+                'new_val': user.email
+            })
+        )
+        assert resp.status_code == 409
+        assert resp.get_json()['msg'] == 'New value already taken'
+
+    def test_メールアドレスの変更ができること(
+        self, client: FlaskClient, user: User, headers: dict[str, str]
+    ) -> None:
+        resp = client.patch(
+            USER_API_ROUTE,
+            headers = headers,
+            data = dumps({
+                'param': 'email',
+                'current_val': user.email,
+                'new_val': 'jiro@email.com'
+            })
+        )
+        assert resp.status_code == 200
+        assert resp.get_json()['msg'] == 'Success'
+
+    def test_パスワードの変更ができること(
+        self, client: FlaskClient, password: str, headers: dict[str, str]
+    ) -> None:
+        resp = client.patch(
+            USER_API_ROUTE,
+            headers = headers,
+            data = dumps({
+                'param': 'password',
+                'current_val': password,
+                'new_val': 'Jiro1234'
+            })
+        )
+        assert resp.status_code == 200
+        assert resp.get_json()['msg'] == 'Success'
+
+    def test_名前の変更ができること(
+        self, client: FlaskClient, user: User, headers: dict[str, str]
+    ) -> None:
+        resp = client.patch(
+            USER_API_ROUTE,
+            headers = headers,
+            data = dumps({
+                'param': 'name',
+                'current_val': user.name,
+                'new_val': 'Jiro'
+            })
+        )
+        assert resp.status_code == 200
+        assert resp.get_json()['msg'] == 'Success'
+
+class TestUserDelete:
+    def test_ユーザーを削除できること(
+        self, client: FlaskClient, headers: dict[str, str]
+    ) -> None:
+        resp = client.delete(
+            USER_API_ROUTE,
+            headers = headers
+        )
+        assert resp.status_code == 204

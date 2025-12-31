@@ -3,13 +3,17 @@
   import BasicForm from '~/components/BasicForm.vue'
   import {accessUserPatch} from '~/composables/ApiClient'
   import {selectValidation} from '~/composables/Validation'
-  import {useAlertStore} from '~/stores/AlertStore'
+  import {useAlertStore} from '~/stores'
   import type {Input, Resp} from '~/types'
 
-  const param: string = useRoute().params.param as string ?? ''
+  const route = useRoute()
+  const router = useRouter()
+  const alert = useAlertStore()
+
+  const param: string = route.params.param as string ?? ''
 
   if (!['email', 'password', 'name'].includes(param)) {
-    useRouter().push('/404')
+    router.push('/404')
   }
 
   useHead({title: 'update ' + param})
@@ -37,15 +41,16 @@
     }
   ])
 
-  async function tryUpdateUser(): Promise<void> {
+  async function updateUser(done: () => void): Promise<void> {
     const resp: Resp = await accessUserPatch(
       param, inputs.value[0]?.value ?? '', inputs.value[1]?.value ?? ''
     )
     if (resp.status === 200) {
-      useRouter().push({name: 'user-info'})
+      router.push({name: 'user-info'})
     }
     else {
-      useAlertStore().showMessage(resp.body.msg)
+      alert.show(resp.body.msg)
+      done()
     }
   }
 </script>
@@ -55,8 +60,8 @@
   <AlertBox/>
   <h4 class="fw-bolder mb-3">update {{ param }}</h4>
   <BasicForm
-    v-bind:inputs="inputs"
-    v-on:update="setInputValue"
-    v-on:submit="tryUpdateUser"
+    :inputs="inputs"
+    @update="setInputValue"
+    @submit="updateUser"
   />
 </template>

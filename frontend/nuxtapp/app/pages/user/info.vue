@@ -1,16 +1,26 @@
 <script setup lang="ts">
+  import {LoadingSpinner} from '~/components/SvgIcons'
   import {accessUserDelete} from '~/composables/ApiClient'
   import {setJwt} from '~/composables/JwtManager'
-  import {useUserStore} from '~/stores/UserStore'
+  import {useUserStore} from '~/stores'
 
   useHead({title: 'user info'})
 
-  async function confirmDeleteUser(): Promise<void> {
+  const router = useRouter()
+  const user = useUserStore()
+
+  const deleting: Ref<boolean> = ref(false)
+
+  async function deleteUser(): Promise<void> {
     if (confirm('Comfirm user deletion?')) {
+      deleting.value = true
       const resp = await accessUserDelete()
       if (resp.status === 204) {
         setJwt()
-        useRouter().push({name: 'index'})
+        router.push({name: 'index'})
+      }
+      else {
+        deleting.value = false
       }
     }
   }
@@ -19,21 +29,21 @@
 
 <template>
   <h4 class="fw-bolder mb-3">user info</h4>
-  <div class="col-sm-9 col-md-6 col-lg-4 border border-primary bg-light mt-4 p-3">
-    name：{{ useUserStore().value.name }}
+  <div class="col-sm-9 col-md-6 col-lg-4 bg-white bg-opacity-25 border border-white rounded mt-4 p-3">
+    name：{{ user.value.name }}
     <br>
     <NuxtLink to="/user/update/name" class="btn btn-primary my-2">
       update
     </NuxtLink>
     <br>
-    <hr class="border-primary">
-    email：{{ useUserStore().value.email }}
+    <hr class="border-white">
+    email：{{ user.value.email }}
     <br>
     <NuxtLink to="/user/update/email" class="btn btn-primary my-2">
       update
     </NuxtLink>
     <br>
-    <hr class="border-primary">
+    <hr class="border-white">
     password：＊＊＊＊＊＊
     <br>
     <NuxtLink to="/user/update/password" class="btn btn-primary my-2">
@@ -42,8 +52,12 @@
   </div>
   <br>
   <div class="my-2">
-    <NuxtLink class="btn btn-danger" v-on:click.prevent="confirmDeleteUser">
-      delete account
+    <NuxtLink class="btn btn-danger" @click.prevent="deleteUser">
+      <LoadingSpinner
+        v-if="deleting" class="mx-4"
+        :size="'25'" :color="'white'"
+      />
+      <span v-else>delete user</span>
     </NuxtLink>
   </div>
 </template>
