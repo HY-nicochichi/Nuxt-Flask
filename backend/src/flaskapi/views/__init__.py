@@ -8,7 +8,7 @@ from .user import bp_user
 
 bp_swagger = get_swaggerui_blueprint(
     base_url = '',
-    api_url = 'http://localhost:5000/swagger.yaml',
+    api_url = 'http://localhost:8000/swagger.yaml',
     blueprint_name = 'bp_swagger'
 )
 

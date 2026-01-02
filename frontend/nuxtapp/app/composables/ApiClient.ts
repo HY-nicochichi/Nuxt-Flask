@@ -1,7 +1,7 @@
 import {getJwt} from '~/composables/JwtManager'
 import type {Resp} from '~/types'
 
-const api_domain: string = 'http://localhost:5000'
+const api_domain: string = 'http://localhost:8000'
 const jwt_api_route: string = '/jwt/'
 const user_api_route: string = '/user/'
 

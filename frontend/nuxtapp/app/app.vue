@@ -4,7 +4,7 @@
 
 
 <template>
-  <div class="bg-black text-white min-vh-100">
+  <div class="text-white">
     <NuxtLoadingIndicator
       color="deeppink" :height="5"
     />
@@ -14,3 +14,8 @@
     </div>
   </div>
 </template>
+
+
+<style>
+  body {background-color:rgb(0,0,50)}
+</style>
