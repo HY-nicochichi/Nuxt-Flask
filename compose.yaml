@@ -22,6 +22,9 @@ services:
       context: ./backend
       args: 
         - TEST_MODE=${TEST_MODE:-lax}
+    read_only: true
+    tmpfs:
+      - /dev/shm:uid=1000,gid=1000
     env_file: 
       - backend.env
     ports: 
@@ -36,6 +39,9 @@ services:
       context: ./frontend
       args: 
         - TEST_MODE=${TEST_MODE:-lax}
+    read_only: true
+    tmpfs:
+      - /dev/shm:uid=1000,gid=1000
     ports: 
       - 8080:8080
     depends_on:
