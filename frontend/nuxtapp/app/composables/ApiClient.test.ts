@@ -1,6 +1,6 @@
 import {describe, it, expect, vi, beforeEach} from 'vitest'
 import {
-  api_domain, jwt_api_route, user_api_route,
+  jwt_api_route, user_api_route,
   accessJwtPost,
   accessUserGet, accessUserPost, accessUserPatch, accessUserDelete
 } from '~/composables/ApiClient'
@@ -36,7 +36,7 @@ describe('ApiClient', () => {
     expect(resp.status).toBe(200)
     expect(resp.body).toEqual({access_token: 'test.jwt.value'})
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining(api_domain + jwt_api_route),
+      expect.stringContaining(jwt_api_route),
       expect.objectContaining({
         method: 'POST',
         mode: 'cors',
@@ -61,7 +61,7 @@ describe('ApiClient', () => {
     expect(resp.status).toBe(200)
     expect(resp.body).toEqual({email: 'test@email.com', name: 'Test'})
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining(api_domain + user_api_route),
+      expect.stringContaining(user_api_route),
       expect.objectContaining({
         method: 'GET',
         mode: 'cors',
@@ -81,7 +81,7 @@ describe('ApiClient', () => {
     expect(resp.status).toBe(201)
     expect(resp.body).toEqual({msg: 'Success'})
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining(api_domain + user_api_route),
+      expect.stringContaining(user_api_route),
       expect.objectContaining({
         method: 'POST',
         mode: 'cors',
@@ -107,7 +107,7 @@ describe('ApiClient', () => {
     expect(resp.status).toBe(200)
     expect(resp.body).toEqual({msg: 'Success'})
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining(api_domain + user_api_route),
+      expect.stringContaining(user_api_route),
       expect.objectContaining({
         method: 'PATCH',
         mode: 'cors',
@@ -133,7 +133,7 @@ describe('ApiClient', () => {
     expect(resp.status).toBe(204)
     expect(resp.body).toBe('')
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining(api_domain + user_api_route),
+      expect.stringContaining(user_api_route),
       expect.objectContaining({
         method: 'DELETE',
         mode: 'cors',

@@ -3,35 +3,42 @@ FROM python:3.14.2-slim AS base
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
+WORKDIR /src
+
 
 
 FROM base AS builder
 
-COPY . .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt && \
+    rm -f requirements.txt
+
+COPY cmd.sh .
+COPY flaskapi .
+COPY swagger.yaml .
 
 
 
 FROM builder AS tester
 
 ARG TEST_MODE=strict
+ENV PYTEST_ADDOPTS="-p no:cacheprovider"
 ENV SQLALCHEMY_DATABASE_URI=sqlite:///:memory:
 ENV JWT_SECRET_KEY=test-secret
 
 RUN case "$TEST_MODE" in \
-        "none") echo "skipped" > app-test-log.txt ;; \
-        "lax") pytest src/flaskapi/tests > app-test-log.txt 2>&1 || true ;; \
-        "strict") pytest src/flaskapi/tests && echo "success" > app-test-log.txt;; \
+        "none") echo "skipped" > /app-test-log.txt ;; \
+        "lax") pytest tests > /app-test-log.txt 2>&1 || true ;; \
+        "strict") pytest tests && echo "success" > /app-test-log.txt;; \
     esac
-RUN rm -r src/flaskapi/tests && pip uninstall -y pytest
+RUN rm -rf tests && pip uninstall -y pytest
 
 
 
 FROM base AS runner
 
-WORKDIR /src
-
-RUN groupadd -g 1000 app && useradd -u 1000 -g app -s /sbin/nologin app
+RUN groupadd -g 1000 app && \
+    useradd -u 1000 -g app -s /sbin/nologin app
 
 COPY --from=tester /usr/local /usr/local
 COPY --from=tester --chown=app:app /src .

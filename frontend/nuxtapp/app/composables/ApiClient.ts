@@ -1,7 +1,6 @@
 import {getJwt} from '~/composables/JwtManager'
 import type {Resp} from '~/types'
 
-const api_domain: string = 'http://localhost:8000'
 const jwt_api_route: string = '/jwt/'
 const user_api_route: string = '/user/'
 
@@ -28,7 +27,7 @@ async function apiRequest(
   try {
     await new Promise(r => setTimeout(r, 500))  // アクセスによる遅延を再現
     const response: Response = await fetch(
-      api_domain + route, init
+      useRuntimeConfig().public.apiUrlBase + route, init
     )
     return {
       status: response.status,
@@ -97,7 +96,7 @@ async function accessUserDelete(): Promise<Resp> {
 }
 
 export {
-  api_domain, jwt_api_route, user_api_route,
+  jwt_api_route, user_api_route,
   accessJwtPost,
   accessUserGet, accessUserPost, accessUserPatch, accessUserDelete
 }

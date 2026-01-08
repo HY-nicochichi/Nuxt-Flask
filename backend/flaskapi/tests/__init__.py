@@ -15,7 +15,7 @@ from extensions import (
 def app():
     app = Flask('test')
 
-    app.config.from_pyfile('/src/flaskapi/settings.py')
+    app.config.from_pyfile('settings.py')
     app.config['TESTING'] = True
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(seconds=1.0)
 

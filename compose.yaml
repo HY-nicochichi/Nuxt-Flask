@@ -20,7 +20,7 @@ services:
     container_name: nuxt-flask-backend
     build:
       context: ./backend
-      args: 
+      args:
         - TEST_MODE=${TEST_MODE:-lax}
     read_only: true
     tmpfs:
@@ -37,7 +37,8 @@ services:
     container_name: nuxt-flask-frontend
     build:
       context: ./frontend
-      args: 
+      args:
+        - API_URL_BASE=${API_URL_BASE:-http://localhost:8000}
         - TEST_MODE=${TEST_MODE:-lax}
     read_only: true
     tmpfs:

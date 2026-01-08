@@ -1,5 +1,8 @@
 FROM node:25.2.1-slim AS builder
 
+ARG API_URL_BASE
+ENV API_URL_BASE=${API_URL_BASE}
+
 COPY . .
 WORKDIR /nuxtapp
 
@@ -22,7 +25,8 @@ RUN case "$TEST_MODE" in \
 
 FROM nginx:1.29.4-alpine-slim AS runner
 
-RUN addgroup -g 1000 app && adduser -D -u 1000 -G app -s /sbin/nologin app
+RUN addgroup -g 1000 app && \
+    adduser -D -u 1000 -G app -s /sbin/nologin app
 
 COPY --from=tester --chown=app:app /nginx.conf /etc/nginx
 COPY --from=tester --chown=app:app /nuxtapp/.output/public /usr/share/nginx/html
