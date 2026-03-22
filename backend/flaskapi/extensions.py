@@ -1,4 +1,5 @@
 from typing import Self
+from collections.abc import Callable
 from uuid import uuid4
 from contextlib import contextmanager
 from datetime import (
@@ -8,7 +9,10 @@ from datetime import (
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
-from sqlalchemy import select
+from sqlalchemy import (
+    Select,
+    select
+)
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
@@ -45,12 +49,11 @@ class AppModel(Base):
     __abstract__ = True
 
     @classmethod
-    def all(cls) -> list[Self]:
-        return db_orm.session.scalars(select(cls)).all()
-
-    @classmethod
-    def where(cls, *args) -> list[Self]:
-        return db_orm.session.scalars(select(cls).where(*args)).all()
+    def all(cls, *args: Callable[[Select], Select]) -> list[Self]:
+        statement: Select = select(cls)
+        for arg in args:
+            statement = arg(statement)
+        return db_orm.session.scalars(statement).all()
 
     @classmethod
     def find_by(cls, **kwargs) -> Self|None:
