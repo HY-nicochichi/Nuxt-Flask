@@ -1,7 +1,10 @@
 from typing import Self
 from collections.abc import Callable
-from uuid import uuid4
 from contextlib import contextmanager
+from uuid import (
+    UUID,
+    uuid7
+)
 from datetime import (
     datetime,
     UTC
@@ -19,15 +22,12 @@ from sqlalchemy.orm import (
     mapped_column
 )
 
-def uuid_str() -> str:
-    return str(uuid4())
-
 def utc_now() -> datetime:
-    return datetime.now(UTC)
+    return datetime.now(UTC).replace(tzinfo=None)
 
 class Base(DeclarativeBase):
     __abstract__ = True
-    id : Mapped[str] = mapped_column(default=uuid_str, primary_key=True)
+    id : Mapped[UUID] = mapped_column(default=uuid7, primary_key=True)
     created: Mapped[datetime] = mapped_column(default=utc_now, nullable=False)
     updated: Mapped[datetime] = mapped_column(default=utc_now, onupdate=utc_now, nullable=False)
 
@@ -74,3 +74,8 @@ class AppModel(Base):
     def delete(self) -> None:
         db_orm.session.delete(self)
         db_orm.session.flush()
+
+    def to_dict(self) -> dict:
+        dictionary: dict = self.__dict__.copy()
+        dictionary.pop('_sa_instance_state')
+        return dictionary

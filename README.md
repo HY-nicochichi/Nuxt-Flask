@@ -1,6 +1,8 @@
 ## Nuxt-Flask
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Docker](https://img.shields.io/badge/docker-blue.svg?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](https://opensource.org/licenses/MIT)
+[![Docker](https://img.shields.io/badge/Docker-blue?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Nuxt](https://img.shields.io/badge/Nuxt-limegreen?style=flat&logo=nuxt&logoColor=white)](https://nuxt.com/)
+[![Flask](https://img.shields.io/badge/Flask-darkcyan?style=flat&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
 
 Nuxt + Flask user auth application  
   

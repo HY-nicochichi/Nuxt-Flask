@@ -11,14 +11,14 @@ from . import (
     headers
 )
 
-JWT_API_ROUTE: str = '/jwt/'
+JWT_ROUTE: str = '/jwt/'
 
 class TestJwtPost:
     def test_Content_Typeが正しくない場合は415エラーになること(
         self, client: FlaskClient, password: str, user: User
     ) -> None:
         resp = client.post(
-            JWT_API_ROUTE,
+            JWT_ROUTE,
             data = dumps({
                 'email': user.email,
                 'password': password
@@ -31,7 +31,7 @@ class TestJwtPost:
         self, client: FlaskClient, headers: dict[str, str]
     ) -> None:
         resp = client.post(
-            JWT_API_ROUTE,
+            JWT_ROUTE,
             headers = headers,
             data = 'invalid'
         )
@@ -42,7 +42,7 @@ class TestJwtPost:
         self, client: FlaskClient, user: User, headers: dict[str, str]
     ) -> None:
         resp = client.post(
-            JWT_API_ROUTE,
+            JWT_ROUTE,
             headers = headers,
             data = dumps({
                 'email': user.email,
@@ -56,7 +56,7 @@ class TestJwtPost:
         self, client: FlaskClient, password: str, headers: dict[str, str]
     ) -> None:
         resp = client.post(
-            JWT_API_ROUTE,
+            JWT_ROUTE,
             headers = headers,
             data = dumps({
                 'email': 'jiro@email.com',
@@ -70,7 +70,7 @@ class TestJwtPost:
         self, client: FlaskClient, user: User, headers: dict[str, str]
     ) -> None:
         resp = client.post(
-            JWT_API_ROUTE,
+            JWT_ROUTE,
             headers = headers,
             data = dumps({
                 'email': user.email,
@@ -84,7 +84,7 @@ class TestJwtPost:
         self, app: Flask, client: FlaskClient, password: str, user: User, headers: dict[str, str]
     ) -> None:
         resp = client.post(
-            JWT_API_ROUTE,
+            JWT_ROUTE,
             headers = headers,
             data = dumps({
                 'email': user.email,
@@ -94,4 +94,4 @@ class TestJwtPost:
         assert resp.status_code == 200
         with app.app_context():
             access_token: str = resp.get_json()['access_token']
-            assert decode_token(access_token)['sub'] == user.id
+            assert decode_token(access_token)['sub'] == str(user.id)

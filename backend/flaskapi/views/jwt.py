@@ -15,6 +15,6 @@ bp_jwt = Blueprint('bp_jwt', __name__, url_prefix='/jwt')
 def jwt_post(data: JWTPost) -> tuple[Response, int]:
     user: User|None = User.find_by(email=data.email)
     if user and user.is_password_matched(data.password):
-        return jsonify(access_token=create_access_token(user.id)), 200
+        return jsonify(access_token=create_access_token(str(user.id))), 200
     else:
         return jsonify(msg='Invalid email or password'), 401

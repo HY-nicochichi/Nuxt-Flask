@@ -53,6 +53,6 @@ def user(app: Flask, password: str):
 def headers(app: Flask, user: User):
     with app.app_context():
         return {
-            'Authorization': f'Bearer {create_access_token(user.id)}',
+            'Authorization': f'Bearer {create_access_token(str(user.id))}',
             'Content-Type': 'application/json'
         }

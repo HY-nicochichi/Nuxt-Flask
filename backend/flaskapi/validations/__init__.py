@@ -3,6 +3,7 @@ from functools import wraps
 from re import fullmatch
 from pydantic import (
     BaseModel,
+    TypeAdapter,
     ValidationError
 )
 from pydantic_core import PydanticCustomError
@@ -21,14 +22,17 @@ def validate_json(func: Callable) -> Callable:
     def decorated(*args, **kwargs) -> tuple[Response, int]:
         try:
             DataModel: type[BaseModel] = func.__annotations__.get('data')
-            data = DataModel.model_validate(request.get_json())
+            data: BaseModel = TypeAdapter(DataModel).validate_python(request.get_json())
             return func(data, *args, **kwargs)
         except UnsupportedMediaType:
             return jsonify(msg='Invalid Content-Type header'), 415
         except BadRequest:
             return jsonify(msg='Invalid JSON body syntax'), 400
         except ValidationError as e:
-            return jsonify(validation_failure=e.errors()), 422
+            validation_failure: list[dict] = [
+                {key: detail.get(key) for key in ('input', 'loc', 'msg')} for detail in e.errors()
+            ]
+            return jsonify(validation_failure=validation_failure), 422
     return decorated
 
 def validate_email(val: str) -> str:

@@ -1,5 +1,5 @@
 from time import sleep
-from uuid import uuid4
+from uuid import uuid7
 from json import dumps
 from flask import Flask
 from flask.testing import FlaskClient
@@ -13,36 +13,36 @@ from . import (
     headers
 )
 
-USER_API_ROUTE: str = '/user/'
+USER_ROUTE: str = '/user/'
 
 class TestUserGet:
     def test_未ログイン時は401エラーになること(
         self, client: FlaskClient
     ) -> None:
-        resp = client.get(USER_API_ROUTE)
+        resp = client.get(USER_ROUTE)
         assert resp.status_code == 401
         assert resp.get_json()['msg'] == 'Missing Authorization Header'
   
     def test_存在しないユーザーのトークンの場合は401エラーになること(
         self, app: Flask, client: FlaskClient
     ) -> None:
-        bad_id: str = str(uuid4())
+        bad_id_str: str = str(uuid7())
         with app.app_context():
-            bad_jwt: str = create_access_token(bad_id)
+            bad_jwt: str = create_access_token(bad_id_str)
         resp = client.get(
-            USER_API_ROUTE,
+            USER_ROUTE,
             headers = {'Authorization': f'Bearer {bad_jwt}'}
         )
         assert resp.status_code == 401
-        assert resp.get_json()['msg'] == f'Error loading the user {bad_id}'
+        assert resp.get_json()['msg'] == f'Error loading the user {bad_id_str}'
 
     def test_正しいトークンでユーザー情報を取得できること(
         self, app: Flask, client: FlaskClient, user: User
     ) -> None:
         with app.app_context():
-            good_jwt: str = create_access_token(user.id)
+            good_jwt: str = create_access_token(str(user.id))
         resp = client.get(
-            USER_API_ROUTE,
+            USER_ROUTE,
             headers = {'Authorization': f'Bearer {good_jwt}'}
         )
         assert resp.status_code == 200
@@ -53,10 +53,10 @@ class TestUserGet:
         self, app: Flask, client: FlaskClient, user: User
     ) -> None:
         with app.app_context():
-            good_jwt: str = create_access_token(user.id)
+            good_jwt: str = create_access_token(str(user.id))
         sleep(3.0)
         resp = client.get(
-            USER_API_ROUTE,
+            USER_ROUTE,
             headers = {'Authorization': f'Bearer {good_jwt}'}
         )
         assert resp.status_code == 401
@@ -67,7 +67,7 @@ class TestUserPost:
         self, client: FlaskClient, user: User, headers: dict[str, str]
     ) -> None:
         resp = client.post(
-            USER_API_ROUTE,
+            USER_ROUTE,
             headers = headers,
             data = dumps({
                 'email': user.email,
@@ -82,7 +82,7 @@ class TestUserPost:
         self, client: FlaskClient, headers: dict[str, str]
     ) -> None:
         resp = client.post(
-            USER_API_ROUTE,
+            USER_ROUTE,
             headers = headers,
             data = dumps({
                 'email': 'jiro@email.com',
@@ -97,7 +97,7 @@ class TestUserPatch:
         self, client: FlaskClient, headers: dict[str, str]
     ) -> None:
         resp = client.patch(
-            USER_API_ROUTE,
+            USER_ROUTE,
             headers = headers,
             data = dumps({
                 'param': 'email',
@@ -112,7 +112,7 @@ class TestUserPatch:
         self, client: FlaskClient, user: User, headers: dict[str, str]
     ) -> None:
         resp = client.patch(
-            USER_API_ROUTE,
+            USER_ROUTE,
             headers = headers,
             data = dumps({
                 'param': 'email',
@@ -127,7 +127,7 @@ class TestUserPatch:
         self, client: FlaskClient, user: User, headers: dict[str, str]
     ) -> None:
         resp = client.patch(
-            USER_API_ROUTE,
+            USER_ROUTE,
             headers = headers,
             data = dumps({
                 'param': 'email',
@@ -141,7 +141,7 @@ class TestUserPatch:
         self, client: FlaskClient, password: str, headers: dict[str, str]
     ) -> None:
         resp = client.patch(
-            USER_API_ROUTE,
+            USER_ROUTE,
             headers = headers,
             data = dumps({
                 'param': 'password',
@@ -155,7 +155,7 @@ class TestUserPatch:
         self, client: FlaskClient, user: User, headers: dict[str, str]
     ) -> None:
         resp = client.patch(
-            USER_API_ROUTE,
+            USER_ROUTE,
             headers = headers,
             data = dumps({
                 'param': 'name',
@@ -170,7 +170,7 @@ class TestUserDelete:
         self, client: FlaskClient, headers: dict[str, str]
     ) -> None:
         resp = client.delete(
-            USER_API_ROUTE,
+            USER_ROUTE,
             headers = headers
         )
         assert resp.status_code == 204

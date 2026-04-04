@@ -1,12 +1,11 @@
 from typing import (
-    Self,
     Literal,
     Annotated
 )
 from pydantic import (
     BaseModel,
     AfterValidator,
-    model_validator
+    Field
 )
 from . import (
     validate_email,
@@ -19,21 +18,19 @@ class UserPost(BaseModel):
     password: Annotated[str, AfterValidator(validate_password)]
     name: Annotated[str, AfterValidator(validate_name)]
 
-class UserPatch(BaseModel):
-    param: Literal['email', 'password', 'name']
-    current_val: str
-    new_val: str
+class EmailPatch(BaseModel):
+    param: Literal['email']
+    current_val: Annotated[str, AfterValidator(validate_email)]
+    new_val: Annotated[str, AfterValidator(validate_email)]
 
-    @model_validator(mode='after')
-    def user_patch_validator(self) -> Self:
-        match self.param:
-            case 'email':
-                validate_email(self.current_val)
-                validate_email(self.new_val)
-            case 'password':
-                validate_password(self.current_val)
-                validate_password(self.new_val)
-            case 'name':
-                validate_name(self.current_val)
-                validate_name(self.new_val)
-        return self
+class PasswordPatch(BaseModel):
+    param: Literal['password']
+    current_val: Annotated[str, AfterValidator(validate_password)]
+    new_val: Annotated[str, AfterValidator(validate_password)]
+
+class NamePatch(BaseModel):
+    param: Literal['name']
+    current_val: Annotated[str, AfterValidator(validate_name)]
+    new_val: Annotated[str, AfterValidator(validate_name)]
+
+type UserPatch = Annotated[EmailPatch|PasswordPatch|NamePatch, Field(discriminator='param')]
