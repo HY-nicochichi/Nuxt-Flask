@@ -1,58 +1,57 @@
-from pytest import fixture
+from uuid import UUID
+from collections.abc import Callable
+from functools import wraps
 from flask import Flask
+from flask.testing import FlaskClient
 from flask_jwt_extended import create_access_token
-from models import User
 from views import bps
 from extensions import (
+    AppModel,
     db_orm,
     jwt_manager,
     cross_origin,
     db_transaction
 )
 
-@fixture(scope='function')
-def app():
-    app = Flask('test')
+app = Flask('test')
 
-    app.config.from_pyfile('settings.py')
+app.config.from_pyfile('settings.py')
 
-    for bp in bps:
-        app.register_blueprint(bp)
+for bp in bps:
+    app.register_blueprint(bp)
 
-    db_orm.init_app(app)
-    jwt_manager.init_app(app)
-    cross_origin.init_app(app)
+db_orm.init_app(app)
+jwt_manager.init_app(app)
+cross_origin.init_app(app)
 
-    with app.app_context():
-        db_orm.create_all()
-        db_orm.session.remove()
+client: FlaskClient = app.test_client()
 
-    yield app
+def db_cleaned(func: Callable) -> Callable:
+    @wraps(func)
+    def decorated(*args, **kwargs) -> None:
+        with app.app_context():
+            db_orm.drop_all()
+            db_orm.create_all()
+        func(*args, **kwargs)
+    return staticmethod(decorated)
 
-    with app.app_context():
-        db_orm.session.remove()
-        db_orm.drop_all()
-
-@fixture(scope='function')
-def client(app: Flask):
-    return app.test_client()
-
-@fixture(scope='function')
-def password():
-    return 'Taro1234'
-
-@fixture(scope='function')
-def user(app: Flask, password: str):
+def create_db_data(model: type[AppModel], **kwargs) -> AppModel:
     with app.app_context():
         with db_transaction():
-            user = User.create(email='taro@email.com', password=password, name='Taro')
-        db_orm.session.refresh(user)
-    return user
+            instance: AppModel = model.create(**kwargs)
+        db_orm.session.refresh(instance)
+        db_orm.session.expunge(instance)
+        db_orm.session.remove()
+    return instance
 
-@fixture(scope='function')
-def headers(app: Flask, user: User):
+user_data: dict[str, str] = {
+    'email': 'taro@email.com',
+    'password': 'Taro1234',
+    'name': 'Taro'
+}
+
+def auth_header(id: UUID) -> dict[str, str]:
     with app.app_context():
-        return {
-            'Authorization': f'Bearer {create_access_token(str(user.id))}',
-            'Content-Type': 'application/json'
-        }
+        return {'Authorization': f'Bearer {create_access_token(str(id))}'}
+
+json_header: dict[str, str] = {'Content-Type': 'application/json'}

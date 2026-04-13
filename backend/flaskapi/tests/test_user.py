@@ -1,135 +1,116 @@
 from time import sleep
 from uuid import uuid7
 from json import dumps
-from flask import Flask
-from flask.testing import FlaskClient
-from flask_jwt_extended import create_access_token
 from models import User
 from . import (
     app,
     client,
-    password,
-    user,
-    headers
+    db_cleaned,
+    create_db_data,
+    user_data,
+    auth_header,
+    json_header
 )
 
 USER_ROUTE: str = '/user/'
 
 class TestUserGet:
-    def test_未ログイン時は401エラーになること(
-        self, client: FlaskClient
-    ) -> None:
+    @db_cleaned
+    def test_Missing_Authorization_header_401() -> None:
         resp = client.get(USER_ROUTE)
         assert resp.status_code == 401
-        assert resp.get_json()['msg'] == 'Missing Authorization Header'
-  
-    def test_存在しないユーザーのトークンの場合は401エラーになること(
-        self, app: Flask, client: FlaskClient
-    ) -> None:
-        bad_id_str: str = str(uuid7())
-        with app.app_context():
-            bad_jwt: str = create_access_token(bad_id_str)
+        assert resp.get_json() == {'msg': 'Missing Authorization Header'}
+
+    @db_cleaned
+    def test_Error_loading_user_401() -> None:
+        bad_id = uuid7()
         resp = client.get(
-            USER_ROUTE,
-            headers = {'Authorization': f'Bearer {bad_jwt}'}
+            USER_ROUTE, headers=auth_header(bad_id)
         )
         assert resp.status_code == 401
-        assert resp.get_json()['msg'] == f'Error loading the user {bad_id_str}'
+        assert resp.get_json() == {'msg': f'Error loading the user {bad_id}'}
 
-    def test_正しいトークンでユーザー情報を取得できること(
-        self, app: Flask, client: FlaskClient, user: User
-    ) -> None:
-        with app.app_context():
-            good_jwt: str = create_access_token(str(user.id))
+    @db_cleaned
+    def test_Get_user_info_200() -> None:
+        user: User = create_db_data(User, **user_data)
         resp = client.get(
-            USER_ROUTE,
-            headers = {'Authorization': f'Bearer {good_jwt}'}
+            USER_ROUTE, headers=auth_header(user.id)
         )
         assert resp.status_code == 200
-        assert resp.get_json()['email'] == user.email
-        assert resp.get_json()['name'] == user.name
+        assert resp.get_json() == {'email': user.email, 'name': user.name}
 
-    def test_有効期限が切れたトークンの場合は401エラーになること(
-        self, app: Flask, client: FlaskClient, user: User
-    ) -> None:
-        with app.app_context():
-            good_jwt: str = create_access_token(str(user.id))
+    @db_cleaned
+    def test_Token_has_expired_401() -> None:
+        user: User = create_db_data(User, **user_data)
+        expired_auth_header = auth_header(user.id)
         sleep(3.0)
         resp = client.get(
-            USER_ROUTE,
-            headers = {'Authorization': f'Bearer {good_jwt}'}
+            USER_ROUTE, headers=expired_auth_header
         )
         assert resp.status_code == 401
-        assert resp.get_json()['msg'] == 'Token has expired'
+        assert resp.get_json() == {'msg': 'Token has expired'}
 
 class TestUserPost:
-    def test_既に登録済みのメールアドレスの場合は409エラーになること(
-        self, client: FlaskClient, user: User, headers: dict[str, str]
-    ) -> None:
+    @db_cleaned
+    def test_Email_already_taken_409() -> None:
+        user: User = create_db_data(User, **user_data)
         resp = client.post(
             USER_ROUTE,
-            headers = headers,
-            data = dumps({
-                'email': user.email,
-                'password': 'Jiro1234',
-                'name': 'Jiro'
+            headers=json_header,
+            data=dumps({
+                'email': user.email, 'password': 'Jiro1234', 'name': 'Jiro'
             })
         )
         assert resp.status_code == 409
-        assert resp.get_json()['msg'] == 'Email already taken'
+        assert resp.get_json() == {'msg': 'Email already taken'}
 
-    def test_新しいメールアドレスなら204で登録成功すること(
-        self, client: FlaskClient, headers: dict[str, str]
-    ) -> None:
+    @db_cleaned
+    def test_User_created_204() -> None:
         resp = client.post(
-            USER_ROUTE,
-            headers = headers,
-            data = dumps({
-                'email': 'jiro@email.com',
-                'password': 'Jiro1234',
-                'name': 'Jiro'
-            })
+            USER_ROUTE, headers=json_header, data=dumps(user_data)
         )
         assert resp.status_code == 204
+        with app.app_context():
+            assert len(User.all()) == 1
 
 class TestUserPatch:
-    def test_現在の値が正しくない場合は422エラーになること(
-        self, client: FlaskClient, headers: dict[str, str]
-    ) -> None:
+    @db_cleaned
+    def test_Invalid_current_value_422() -> None:
+        user: User = create_db_data(User, **user_data)
         resp = client.patch(
             USER_ROUTE,
-            headers = headers,
-            data = dumps({
+            headers=auth_header(user.id)|json_header,
+            data=dumps({
                 'param': 'email',
                 'current_val': 'jiro@email.com',
                 'new_val': 'jiro@email.com'
             })
         )
         assert resp.status_code == 422
-        assert resp.get_json()['msg'] == 'Invalid current value'
+        assert resp.get_json() == {'msg': 'Invalid current value'}
 
-    def test_新しい値が既に使われている場合は409エラーになること(
-        self, client: FlaskClient, user: User, headers: dict[str, str]
-    ) -> None:
+    @db_cleaned
+    def test_New_value_already_taken_409() -> None:
+        user: User = create_db_data(User, **user_data)
         resp = client.patch(
             USER_ROUTE,
-            headers = headers,
-            data = dumps({
+            headers=auth_header(user.id)|json_header,
+            data=dumps({
                 'param': 'email',
                 'current_val': user.email,
                 'new_val': user.email
             })
         )
         assert resp.status_code == 409
-        assert resp.get_json()['msg'] == 'New value already taken'
+        assert resp.get_json() == {'msg': 'New value already taken'}
 
-    def test_メールアドレスの変更ができること(
-        self, client: FlaskClient, user: User, headers: dict[str, str]
-    ) -> None:
+    @db_cleaned
+    def test_Email_updated_204() -> None:
+        user: User = create_db_data(User, **user_data)
         resp = client.patch(
             USER_ROUTE,
-            headers = headers,
-            data = dumps({
+            headers=auth_header(user.id)|json_header,
+            data=dumps({
                 'param': 'email',
                 'current_val': user.email,
                 'new_val': 'jiro@email.com'
@@ -137,27 +118,27 @@ class TestUserPatch:
         )
         assert resp.status_code == 204
 
-    def test_パスワードの変更ができること(
-        self, client: FlaskClient, password: str, headers: dict[str, str]
-    ) -> None:
+    @db_cleaned
+    def test_Password_updated_204() -> None:
+        user: User = create_db_data(User, **user_data)
         resp = client.patch(
             USER_ROUTE,
-            headers = headers,
-            data = dumps({
+            headers=auth_header(user.id)|json_header,
+            data=dumps({
                 'param': 'password',
-                'current_val': password,
+                'current_val': user_data['password'],
                 'new_val': 'Jiro1234'
             })
         )
         assert resp.status_code == 204
 
-    def test_名前の変更ができること(
-        self, client: FlaskClient, user: User, headers: dict[str, str]
-    ) -> None:
+    @db_cleaned
+    def test_Name_updated_204() -> None:
+        user: User = create_db_data(User, **user_data)
         resp = client.patch(
             USER_ROUTE,
-            headers = headers,
-            data = dumps({
+            headers=auth_header(user.id)|json_header,
+            data=dumps({
                 'param': 'name',
                 'current_val': user.name,
                 'new_val': 'Jiro'
@@ -166,11 +147,12 @@ class TestUserPatch:
         assert resp.status_code == 204
 
 class TestUserDelete:
-    def test_ユーザーを削除できること(
-        self, client: FlaskClient, headers: dict[str, str]
-    ) -> None:
+    @db_cleaned
+    def test_User_deleted_204() -> None:
+        user: User = create_db_data(User, **user_data)
         resp = client.delete(
-            USER_ROUTE,
-            headers = headers
+            USER_ROUTE, headers=auth_header(user.id)
         )
         assert resp.status_code == 204
+        with app.app_context():
+            assert len(User.all()) == 0

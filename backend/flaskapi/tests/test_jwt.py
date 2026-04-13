@@ -1,95 +1,81 @@
 from json import dumps
-from flask import Flask
-from flask.testing import FlaskClient
 from flask_jwt_extended import decode_token
 from models import User
 from . import (
     app,
     client,
-    password,
-    user,
-    headers
+    db_cleaned,
+    create_db_data,
+    user_data,
+    json_header
 )
 
 JWT_ROUTE: str = '/jwt/'
 
 class TestJwtPost:
-    def test_Content_Typeが正しくない場合は415エラーになること(
-        self, client: FlaskClient, password: str, user: User
-    ) -> None:
+    @db_cleaned
+    def test_Invalid_Content_Type_header_415() -> None:
         resp = client.post(
             JWT_ROUTE,
-            data = dumps({
-                'email': user.email,
-                'password': password
-            })
+            data=dumps({'email': user_data['email'], 'password': user_data['password']})
         )
         assert resp.status_code == 415
-        assert resp.get_json()['msg'] == 'Invalid Content-Type header'
+        assert resp.get_json() == {'msg': 'Invalid Content-Type header'}
 
-    def test_JSONの構文が不正な場合は400エラーになること(
-        self, client: FlaskClient, headers: dict[str, str]
-    ) -> None:
+    @db_cleaned
+    def test_Invalid_JSON_body_syntax_400() -> None:
         resp = client.post(
-            JWT_ROUTE,
-            headers = headers,
-            data = 'invalid'
+            JWT_ROUTE, headers=json_header, data='Invalid JSON'
         )
         assert resp.status_code == 400
-        assert resp.get_json()['msg'] == 'Invalid JSON body syntax'
+        assert resp.get_json() == {'msg': 'Invalid JSON body syntax'}
 
-    def test_バリデーションエラーの場合は422エラーになること(
-        self, client: FlaskClient, user: User, headers: dict[str, str]
-    ) -> None:
+    @db_cleaned
+    def test_Validation_failure_422() -> None:
         resp = client.post(
             JWT_ROUTE,
-            headers = headers,
-            data = dumps({
-                'email': user.email,
-                'password': 'invalid'
-            })
+            headers=json_header,
+            data=dumps({'email': user_data['email'], 'password': 'Invalid Password'})
         )
         assert resp.status_code == 422
-        assert resp.get_json()['validation_failure'][0]['loc'] == ['password']
+        assert resp.get_json() == {
+            'validation_failure': [
+                {
+                    'input': 'Invalid Password',
+                    'loc': ['password'],
+                    'msg': 'Password must be 8-20 characters and include uppercase, lowercase, and number'
+                }
+            ]
+        }
 
-    def test_存在しないメールアドレスの場合は401エラーになること(
-        self, client: FlaskClient, password: str, headers: dict[str, str]
-    ) -> None:
+    @db_cleaned
+    def test_Invalid_email_401() -> None:
         resp = client.post(
             JWT_ROUTE,
-            headers = headers,
-            data = dumps({
-                'email': 'jiro@email.com',
-                'password': password
-            })
+            headers=json_header,
+            data=dumps({'email': user_data['email'], 'password': user_data['password']})
         )
         assert resp.status_code == 401
-        assert resp.get_json()['msg'] == 'Invalid email or password'
+        assert resp.get_json() == {'msg': 'Invalid email or password'}
 
-    def test_パスワードが間違っている場合は401エラーになること(
-        self, client: FlaskClient, user: User, headers: dict[str, str]
-    ) -> None:
+    @db_cleaned
+    def test_Invalid_password_401() -> None:
+        user: User = create_db_data(User, **user_data)
         resp = client.post(
             JWT_ROUTE,
-            headers = headers,
-            data = dumps({
-                'email': user.email,
-                'password': 'Jiro1234'
-            })
+            headers=json_header,
+            data=dumps({'email': user.email, 'password': 'WrongPassword1234'})
         )
         assert resp.status_code == 401
-        assert resp.get_json()['msg'] == 'Invalid email or password'
+        assert resp.get_json() == {'msg': 'Invalid email or password'}
 
-    def test_正しい認証情報でアクセストークンが発行されること(
-        self, app: Flask, client: FlaskClient, password: str, user: User, headers: dict[str, str]
-    ) -> None:
+    @db_cleaned
+    def test_Access_token_created_200() -> None:
+        user: User = create_db_data(User, **user_data)
         resp = client.post(
             JWT_ROUTE,
-            headers = headers,
-            data = dumps({
-                'email': user.email,
-                'password': password
-            })
+            headers=json_header,
+            data=dumps({'email': user.email, 'password': user_data['password']})
         )
         assert resp.status_code == 200
         with app.app_context():
