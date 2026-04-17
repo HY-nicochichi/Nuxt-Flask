@@ -1,6 +1,8 @@
 <script setup lang="ts">
   import AlertBox from '~/components/AlertBox.vue'
-  import BasicForm from '~/components/BasicForm.vue'
+  import FormArea from '~/components/FormArea.vue'
+  import InputField from '~/components/InputField.vue'
+  import SubmitButton from '~/components/SubmitButton.vue'
   import {accessJwtPost, accessUserPost} from '~/composables/ApiClient'
   import {setJwt} from '~/composables/JwtManager'
   import {validateEmail, validateName, validatePassword} from '~/composables/Validation'
@@ -12,47 +14,44 @@
   const router = useRouter()
   const alert = useAlertStore()
 
-  const inputValues: Ref<string[]> = ref(['', '', ''])
-
-  function setInputValue(index: number, value: string): void {
-    inputValues.value[index] = value
-  }
-
-  const inputs: ComputedRef<Input[]> = computed(() => [
+  const inputs: Ref<[Input, Input, Input]> = ref([
     {
       label: 'email',
       type: 'text',
-      value: inputValues.value[0] ?? '',
+      value: '',
       validation: validateEmail
     },
     {
       label: 'password',
       type: 'password',
-      value: inputValues.value[1] ?? '',
+      value: '',
       validation: validatePassword
     },
     {
       label: 'name',
       type: 'text',
-      value: inputValues.value[2] ?? '',
+      value: '',
       validation: validateName
     }
   ])
 
-  async function createUser(done: () => void): Promise<void> {
+  const submitting: Ref<boolean> = ref(false)
+
+  async function createUser(): Promise<void> {
+    submitting.value = true
     const resp1: Resp = await accessUserPost(
-      inputs.value[0]?.value ?? '', inputs.value[1]?.value ?? '', inputs.value[2]?.value ?? ''
+      inputs.value[0].value, inputs.value[1].value, inputs.value[2].value
     )
     if (resp1.status === 204) {
       const resp2: Resp = await accessJwtPost(
-        inputs.value[0]?.value ?? '', inputs.value[1]?.value ?? ''
+        inputs.value[0].value, inputs.value[1].value
       )
       setJwt(resp2.body.access_token)
       router.push({name: 'index'})
     }
     else {
       alert.show(resp1.body.msg)
-      done()
+      submitting.value = false
     }
   }
 </script>
@@ -61,9 +60,15 @@
 <template>
   <AlertBox/>
   <h4 class="fw-bolder mb-3">new user</h4>
-  <BasicForm
-    :inputs="inputs"
-    @update="setInputValue"
-    @submit="createUser"
-  />
+  <FormArea>
+    <InputField
+      v-for="(input, index) in inputs" :key="index"
+      :label="input.label" :type="input.type" v-model="input.value"
+    />
+    <br>
+    <SubmitButton
+      :invalid="inputs.some((input) => !input.validation(input.value))"
+      :submitting="submitting" :click="createUser"
+    />
+  </FormArea>
 </template>

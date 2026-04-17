@@ -1,5 +1,6 @@
 <script setup lang="ts">
   import {LoadingSpinner} from '~/components/SvgIcons'
+  import FormArea from '~/components/FormArea.vue'
   import {accessUserDelete} from '~/composables/ApiClient'
   import {setJwt} from '~/composables/JwtManager'
   import {useUserStore} from '~/stores'
@@ -29,35 +30,25 @@
 
 <template>
   <h4 class="fw-bolder mb-3">user info</h4>
-  <div class="col-sm-9 col-md-6 col-lg-4 bg-white bg-opacity-25 border border-white rounded mt-4 p-3">
-    name：{{ user.value.name }}
-    <br>
-    <NuxtLink to="/user/update/name" class="btn btn-primary my-2">
+  <FormArea>
+    <div class="mb-2">name：{{ user.value.name }}</div>
+    <NuxtLink to="/user/update/name" class="btn btn-primary">
       update
     </NuxtLink>
-    <br>
     <hr class="border-white">
-    email：{{ user.value.email }}
-    <br>
-    <NuxtLink to="/user/update/email" class="btn btn-primary my-2">
+    <div class="mb-2">email：{{ user.value.email }}</div>
+    <NuxtLink to="/user/update/email" class="btn btn-primary">
       update
     </NuxtLink>
-    <br>
     <hr class="border-white">
-    password：＊＊＊＊＊＊
-    <br>
-    <NuxtLink to="/user/update/password" class="btn btn-primary my-2">
+    <div class="mb-2">password：＊＊＊＊＊＊＊＊</div>
+    <NuxtLink to="/user/update/password" class="btn btn-primary">
       update
     </NuxtLink>
-  </div>
+  </FormArea>
   <br>
-  <div class="my-2">
-    <NuxtLink class="btn btn-danger" @click.prevent="deleteUser">
-      <LoadingSpinner
-        v-if="deleting" class="mx-4"
-        :size="'25'" :color="'white'"
-      />
-      <span v-else>delete user</span>
-    </NuxtLink>
-  </div>
+  <NuxtLink class="btn btn-danger" @click.prevent="deleteUser">
+    <LoadingSpinner v-if="deleting" class="mx-4" :size="'25'" :color="'white'"/>
+    <span v-else>delete user</span>
+  </NuxtLink>
 </template>

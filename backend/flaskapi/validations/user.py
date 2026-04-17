@@ -1,11 +1,7 @@
-from typing import (
-    Literal,
-    Annotated
-)
+from typing import Annotated
 from pydantic import (
     BaseModel,
-    AfterValidator,
-    Field
+    AfterValidator
 )
 from . import (
     validate_email,
@@ -18,19 +14,8 @@ class UserPost(BaseModel):
     password: Annotated[str, AfterValidator(validate_password)]
     name: Annotated[str, AfterValidator(validate_name)]
 
-class EmailPatch(BaseModel):
-    param: Literal['email']
-    current_val: Annotated[str, AfterValidator(validate_email)]
-    new_val: Annotated[str, AfterValidator(validate_email)]
-
-class PasswordPatch(BaseModel):
-    param: Literal['password']
-    current_val: Annotated[str, AfterValidator(validate_password)]
-    new_val: Annotated[str, AfterValidator(validate_password)]
-
-class NamePatch(BaseModel):
-    param: Literal['name']
-    current_val: Annotated[str, AfterValidator(validate_name)]
-    new_val: Annotated[str, AfterValidator(validate_name)]
-
-type UserPatch = Annotated[EmailPatch|PasswordPatch|NamePatch, Field(discriminator='param')]
+class UserPatch(BaseModel):
+    current_password: Annotated[str, AfterValidator(validate_password)]
+    email: Annotated[str|None, AfterValidator(validate_email)] = None
+    password: Annotated[str|None, AfterValidator(validate_password)] = None
+    name: Annotated[str|None, AfterValidator(validate_name)] = None

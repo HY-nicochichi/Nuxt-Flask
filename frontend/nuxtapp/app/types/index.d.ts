@@ -14,17 +14,13 @@ interface Alert {
   msg: string
 }
 
-interface Validation {
-  (val: string): boolean
-}
-
 interface Input {
   label: string
   type: string
   value: string
-  validation: Validation
+  validation: (val: string) => boolean
 }
 
 export type {
-  Resp, User, Alert, Validation, Input
+  Resp, User, Alert, Input
 }

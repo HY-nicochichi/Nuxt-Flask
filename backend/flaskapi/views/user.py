@@ -36,20 +36,15 @@ def user_post(data: UserPost) -> tuple[Response, int]:
 @jwt_required()
 @validate_json
 def user_patch(data: UserPatch) -> tuple[Response, int]:
-    match data.param:
-        case 'email':
-            if current_user.email != data.current_val:
-                return jsonify(msg='Invalid current value'), 422
-            elif User.find_by(email=data.new_val):
-                return jsonify(msg='New value already taken'), 409
-        case 'password':
-            if not current_user.is_password_matched(data.current_val):
-                return jsonify(msg='Invalid current value'), 422
-        case 'name':
-            if current_user.name != data.current_val:
-                return jsonify(msg='Invalid current value'), 422
+    update_values: dict = data.model_dump(exclude={'current_password'}, exclude_none=True)
+    if update_values == {}:
+        return jsonify(msg='No params to update'), 422
+    if not current_user.is_password_matched(data.current_password):
+        return jsonify(msg='Invalid current password'), 422
+    if data.email and User.find_by(email=data.email):
+        return jsonify(msg='Email already taken'), 409
     with db_transaction():
-        current_user.update(**{data.param: data.new_val})
+        current_user.update(**update_values)
     return Response(content_type='application/json'), 204
 
 @bp_user.delete('/')

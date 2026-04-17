@@ -19,12 +19,12 @@ describe('AlertBox', () => {
     }
   }
 
-  it('初期状態', async() => {
+  it('Initial state', async() => {
     const {elements} = await alertBox()
     expect(elements().alert.exists()).toBe(false)
   })
 
-  it('メッセージの表示', async() => {
+  it('Show message', async() => {
     const {elements} = await alertBox()
     alert.show('test error message')
     await nextTick()

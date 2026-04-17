@@ -3,7 +3,6 @@ from functools import wraps
 from re import fullmatch
 from pydantic import (
     BaseModel,
-    TypeAdapter,
     ValidationError
 )
 from pydantic_core import PydanticCustomError
@@ -22,7 +21,7 @@ def validate_json(func: Callable) -> Callable:
     def decorated(*args, **kwargs) -> tuple[Response, int]:
         try:
             DataModel: type[BaseModel] = func.__annotations__.get('data')
-            data: BaseModel = TypeAdapter(DataModel).validate_python(request.get_json())
+            data: BaseModel = DataModel.model_validate(request.get_json())
             return func(data, *args, **kwargs)
         except UnsupportedMediaType:
             return jsonify(msg='Invalid Content-Type header'), 415

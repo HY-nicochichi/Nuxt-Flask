@@ -1,6 +1,8 @@
 <script setup lang="ts">
   import AlertBox from '~/components/AlertBox.vue'
-  import BasicForm from '~/components/BasicForm.vue'
+  import FormArea from '~/components/FormArea.vue'
+  import InputField from '~/components/InputField.vue'
+  import SubmitButton from '~/components/SubmitButton.vue'
   import {accessJwtPost} from '~/composables/ApiClient'
   import {setJwt} from '~/composables/JwtManager'
   import {validateEmail, validatePassword} from '~/composables/Validation'
@@ -12,30 +14,27 @@
   const router = useRouter()
   const alert = useAlertStore()
 
-  const inputValues: Ref<string[]> = ref(['', ''])
-
-  function setInputValue(index: number, value: string): void {
-    inputValues.value[index] = value
-  }
-
-  const inputs: ComputedRef<Input[]> = computed(() => [
+  const inputs: Ref<[Input, Input]> = ref([
     {
       label: 'email',
       type: 'text',
-      value: inputValues.value[0] ?? '',
+      value: '',
       validation: validateEmail
     },
     {
       label: 'password',
       type: 'password',
-      value: inputValues.value[1] ?? '',
+      value: '',
       validation: validatePassword
     }
   ])
 
-  async function login(done: () => void): Promise<void> {
+  const submitting: Ref<boolean> = ref(false)
+
+  async function login(): Promise<void> {
+    submitting.value = true
     const resp: Resp = await accessJwtPost(
-      inputs.value[0]?.value ?? '', inputs.value[1]?.value ?? ''
+      inputs.value[0].value, inputs.value[1].value
     )
     if (resp.status === 200) {
       setJwt(resp.body.access_token)
@@ -43,7 +42,7 @@
     }
     else {
       alert.show(resp.body.msg)
-      done()
+      submitting.value = false
     }
   }
 </script>
@@ -52,9 +51,15 @@
 <template>
   <AlertBox/>
   <h4 class="fw-bolder mb-3">login</h4>
-  <BasicForm
-    :inputs="inputs"
-    @update="setInputValue"
-    @submit="login"
-  />
+  <FormArea>
+    <InputField
+      v-for="(input, index) in inputs" :key="index"
+      :label="input.label" :type="input.type" v-model="input.value"
+    />
+    <br>
+    <SubmitButton
+      :invalid="inputs.some((input) => !input.validation(input.value))"
+      :submitting="submitting" :click="login"
+    />
+  </FormArea>
 </template>

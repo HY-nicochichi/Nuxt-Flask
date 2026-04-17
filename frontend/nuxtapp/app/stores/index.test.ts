@@ -8,14 +8,14 @@ describe('Stores', () => {
   })
 
   describe('useAlertStore', () => {
-    it('初期状態', () => {
+    it('Initial state', () => {
       const alert = useAlertStore()
       expect(alert.value).toEqual({
         show: false, msg: ''
       })
     })
 
-    it('show でアラート文を保持', () => {
+    it('Show message', () => {
       const alert = useAlertStore()
       alert.show('test error message')
       expect(alert.value).toEqual({
@@ -23,7 +23,7 @@ describe('Stores', () => {
       })
     })
 
-    it('clear でリセット', () => {
+    it('Clear store', () => {
       const alert = useAlertStore()
       alert.show('Temp message')
       alert.clear()
@@ -34,14 +34,14 @@ describe('Stores', () => {
   })
 
   describe('useUserStore', () => {
-    it('初期状態', () => {
+    it('Initial state', () => {
       const user = useUserStore()
       expect(user.value).toEqual({
         login: false, email: '', name: ''
       })
     })
 
-    it('login ユーザー情報を保持', () => {
+    it('Login user', () => {
       const user = useUserStore()
       user.login('test@example.com', 'Taro')
       expect(user.value).toEqual({
@@ -49,7 +49,7 @@ describe('Stores', () => {
       })
     })
 
-    it('clear でリセット', () => {
+    it('Clear store', () => {
       const user = useUserStore()
       user.login('test@example.com', 'Taro')
       user.clear()

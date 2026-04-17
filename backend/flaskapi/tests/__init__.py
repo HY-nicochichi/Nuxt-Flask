@@ -26,22 +26,20 @@ cross_origin.init_app(app)
 
 client: FlaskClient = app.test_client()
 
-def db_cleaned(func: Callable) -> Callable:
+def isolated_test_env(func: Callable) -> Callable:
     @wraps(func)
     def decorated(*args, **kwargs) -> None:
         with app.app_context():
-            db_orm.drop_all()
             db_orm.create_all()
-        func(*args, **kwargs)
+            func(*args, **kwargs)
+            db_orm.session.remove()
+            db_orm.drop_all()
     return staticmethod(decorated)
 
 def create_db_data(model: type[AppModel], **kwargs) -> AppModel:
-    with app.app_context():
-        with db_transaction():
-            instance: AppModel = model.create(**kwargs)
-        db_orm.session.refresh(instance)
-        db_orm.session.expunge(instance)
-        db_orm.session.remove()
+    with db_transaction():
+        instance: AppModel = model.create(**kwargs)
+    db_orm.session.refresh(instance)
     return instance
 
 user_data: dict[str, str] = {
@@ -51,7 +49,6 @@ user_data: dict[str, str] = {
 }
 
 def auth_header(id: UUID) -> dict[str, str]:
-    with app.app_context():
-        return {'Authorization': f'Bearer {create_access_token(str(id))}'}
+    return {'Authorization': f'Bearer {create_access_token(str(id))}'}
 
 json_header: dict[str, str] = {'Content-Type': 'application/json'}

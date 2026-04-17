@@ -34,7 +34,7 @@ describe('NavBar', () => {
     }
   }
 
-  it('未ログイン状態', async() => {
+  it('When not logged in', async() => {
     const {elements} = await navBar()
     expect(getJwt()).toBe('')
     expect(elements().links[0]!.text()).toContain('Nuxt-Flask')
@@ -42,7 +42,7 @@ describe('NavBar', () => {
     expect(elements().links[2]!.text()).toContain('new user')
   })
 
-  it('ログイン状態', async() => {
+  it('When logged in', async() => {
     const {elements} = await navBar()
     testLogin()
     await nextTick()
@@ -51,7 +51,7 @@ describe('NavBar', () => {
     expect(elements().links[2]!.text()).toContain('logout')
   })
 
-  it('/index でのログアウト', async() => {
+  it('Logout in /index', async() => {
     const {elements} = await navBar()
     testLogin()
     await nextTick()
@@ -61,7 +61,7 @@ describe('NavBar', () => {
     expect(routerGoSpy).toHaveBeenCalledWith(0)
   })
 
-  it('/index 以外でのログアウト', async() => {
+  it('Logout not in /index', async() => {
     const {elements} = await navBar('user-info')
     testLogin()
     await nextTick()

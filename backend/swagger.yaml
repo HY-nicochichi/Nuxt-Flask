@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Flask REST-API
-  version: 1.0.3
+  version: 1.0.4
 components:
   securitySchemes:
     bearerAuth:
@@ -99,18 +99,22 @@ paths:
             schema:
               type: object
               properties:
-                param:
+                current_password:
                   type: string
                   required: true
-                  example: name
-                current_val:
+                  example: Taro1234
+                email:
                   type: string
-                  required: true
-                  example: Taro
-                new_val:
+                  required: false
+                  example: new-taro@email.com
+                password:
                   type: string
-                  required: true
-                  example: taro
+                  required: false
+                  example: NewTaro1234
+                name:
+                  type: string
+                  required: false
+                  example: New Taro
       responses:
         '204':
           description: No Content
