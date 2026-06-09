@@ -1,13 +1,7 @@
 from typing import Annotated
-from pydantic import (
-    BaseModel,
-    AfterValidator
-)
-from . import (
-    validate_email,
-    validate_password
-)
+from pydantic import BaseModel, AfterValidator
+from src.validations import validate_email, validate_password
 
-class JWTPost(BaseModel):
+class CreateToken(BaseModel):
     email: Annotated[str, AfterValidator(validate_email)]
     password: Annotated[str, AfterValidator(validate_password)]

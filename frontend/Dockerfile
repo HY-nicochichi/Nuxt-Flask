@@ -1,37 +1,26 @@
-FROM node:25.4.0-trixie-slim AS builder
-
-ARG API_URL_BASE
-ENV API_URL_BASE=${API_URL_BASE}
-
-COPY . .
-WORKDIR /nuxtapp
-
-RUN npm install
-RUN npm run generate
+FROM node:26.3.0-trixie-slim AS base
+ENV HOST=0.0.0.0
+ENV PORT=8080
+WORKDIR /app
 
 
-
-FROM builder AS tester
-
-ARG TEST_MODE=strict
-
-RUN case "$TEST_MODE" in \
-        "none") echo "skipped" > /app-test-log.txt ;; \
-        "lax") npm run test > /app-test-log.txt 2>&1 || true ;; \
-        "strict") npm run test && echo "success" > /app-test-log.txt;; \
-    esac
+FROM base AS base2
+COPY nuxtapp/package*.json .
+RUN npm ci
 
 
+FROM base2 AS base3
+COPY nuxtapp .
+RUN npm run build
 
-FROM nginx:1.29.4-alpine3.23-slim AS runner
 
-RUN addgroup -g 1000 app && \
-    adduser -D -u 1000 -G app -s /sbin/nologin app
+FROM base2 AS dev
+COPY nuxtapp .
+CMD ["npm", "run", "dev"]
 
-COPY --from=tester /nginx.conf /etc/nginx
-COPY --from=tester /nuxtapp/.output/public /usr/share/nginx/html
-COPY --from=tester /app-test-log.txt /var/log
 
+FROM base AS prod
+COPY --from=base3 /app/.output .
+RUN useradd -u 12345 -U -s /sbin/nologin app
 USER app
-
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["node", "server/index.mjs"]

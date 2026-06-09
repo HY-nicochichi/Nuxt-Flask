@@ -3,30 +3,33 @@ services:
   database:
     container_name: nuxt-flask-database
     image: postgres:18.1-alpine3.23
-    env_file: 
-      - database.env
-    expose: 
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=db
+    expose:
       - 5432
     volumes:
       - database:/var/lib/postgresql
+      - ./create-test-db.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: 
+      test:
         - CMD-SHELL
         - pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
+      start_period: 5s
       interval: 2s
       timeout: 3s
       retries: 3
-      start_period: 5s
 
   backend:
     container_name: nuxt-flask-backend
     build:
       context: ./backend
-      args:
-        - TEST_MODE=${TEST_MODE:-lax}
-    env_file: 
-      - backend.env
-    ports: 
+      target: ${BUILD_TARGET:-dev}
+    environment:
+      - ORM_ENGINE_URL=postgresql+psycopg://user:password@database:5432/db
+      - JWT_SECRET_KEY=jwt_secret_key_should_be_32_bytes_or_longer
+    ports:
       - 8000:8000
     depends_on:
       database:
@@ -36,10 +39,12 @@ services:
     container_name: nuxt-flask-frontend
     build:
       context: ./frontend
-      args:
-        - API_URL_BASE=${API_URL_BASE:-http://localhost:8000}
-        - TEST_MODE=${TEST_MODE:-lax}
-    ports: 
+      target: ${BUILD_TARGET:-dev}
+    environment:
+      - API_URL_BASE=http://backend:8000
+      - FORCE_SSL_COOKIE=0
+      - BFF_COOKIE_SECRET=bff_cookie_secret_should_be_32_bytes_or_longer
+    ports:
       - 8080:8080
     depends_on:
       backend:

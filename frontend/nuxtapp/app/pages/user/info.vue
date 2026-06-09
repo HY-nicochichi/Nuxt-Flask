@@ -1,9 +1,11 @@
 <script setup lang="ts">
   import {LoadingSpinner} from '~/components/SvgIcons'
   import FormArea from '~/components/FormArea.vue'
-  import {accessUserDelete} from '~/composables/ApiClient'
-  import {setJwt} from '~/composables/JwtManager'
+  import {
+    accessProtectedBff, bff_user_route, bff_auth_route
+  } from '~/composables/ApiClient'
   import {useUserStore} from '~/stores'
+  import type {Resp} from '~/types'
 
   useHead({title: 'user info'})
 
@@ -15,14 +17,12 @@
   async function deleteUser(): Promise<void> {
     if (confirm('Comfirm user deletion?')) {
       deleting.value = true
-      const resp = await accessUserDelete()
+      const resp: Resp = await accessProtectedBff(bff_user_route + '/me', 'DELETE')
       if (resp.status === 204) {
-        setJwt()
+        await accessProtectedBff(bff_auth_route + '/logout', 'GET')
         router.push({name: 'index'})
       }
-      else {
-        deleting.value = false
-      }
+      deleting.value = false
     }
   }
 </script>

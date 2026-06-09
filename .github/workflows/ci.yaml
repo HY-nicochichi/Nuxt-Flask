@@ -1,0 +1,36 @@
+name: CI pipeline
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+
+  job-dev-containers:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run containers
+        run: BUILD_TARGET=dev docker compose up -d --build && sleep 5
+      - name: Backend health check
+        run: curl -f http://localhost:8000
+      - name: Frontend health check
+        run: curl -f http://localhost:8080
+      - name: Backend unit test
+        run: docker compose exec -T backend pytest
+      - name: Frontend unit test
+        run: docker compose exec -T frontend npm run test
+      - name: Backend type check
+        run: docker compose exec -T backend pyright
+
+  job-prod-containers:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run containers
+        run: BUILD_TARGET=prod docker compose up -d --build && sleep 5
+      - name: Backend health check
+        run: curl -f http://localhost:8000
+      - name: Frontend health check
+        run: curl -f http://localhost:8080
