@@ -1,5 +1,8 @@
 <script setup lang="ts">
   import NavBar from '~/components/NavBar.vue'
+
+  // @ts-ignore
+  await import('bootstrap/dist/js/bootstrap.bundle.min.js')
 </script>
 
 

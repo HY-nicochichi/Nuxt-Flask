@@ -40,9 +40,8 @@ def db_transaction():
     try:
         yield
         db_orm.session.commit()
-    except Exception as e:
+    except Exception:
         db_orm.session.rollback()
-        print(f'[{utc_now()}] ERROR in db_transaction: {e!r}')
         raise
 
 class AppModel(Base):

@@ -3,8 +3,7 @@
   import FormArea from '~/components/FormArea.vue'
   import InputField from '~/components/InputField.vue'
   import SubmitButton from '~/components/SubmitButton.vue'
-  import {accessJwtPost} from '~/composables/ApiClient'
-  import {setJwt} from '~/composables/JwtManager'
+  import {accessBff, bff_auth_route} from '~/composables/ApiClient'
   import {validateEmail, validatePassword} from '~/composables/Validation'
   import {useAlertStore} from '~/stores'
   import type {Input, Resp} from '~/types'
@@ -33,11 +32,14 @@
 
   async function login(): Promise<void> {
     submitting.value = true
-    const resp: Resp = await accessJwtPost(
-      inputs.value[0].value, inputs.value[1].value
+    const resp: Resp = await accessBff(
+      bff_auth_route + 'login', 'POST',
+      {
+        email: inputs.value[0].value,
+        password: inputs.value[1].value
+      }
     )
     if (resp.status === 200) {
-      setJwt(resp.body.access_token)
       router.push({name: 'index'})
     }
     else {

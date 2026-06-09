@@ -3,9 +3,12 @@ export default defineNuxtConfig({
   devtools: {enabled: true},
   ssr: false,
   modules: ['@pinia/nuxt'],
-  runtimeConfig: {
-    public: {apiUrlBase: process.env.API_URL_BASE}
-  },
+  css: ['~/app.scss'],
+  serverHandlers: [{
+    route: '/bff/**',
+    handler: '~/bff/index.ts',
+    middleware: false
+  }],
   app: {
     head: {
       htmlAttrs: {lang: 'en'},
@@ -15,21 +18,7 @@ export default defineNuxtConfig({
         {name: 'viewport', content: 'width=device-width,initial-scale=1.0'}
       ],
       link: [
-        {rel: 'icon', href: '/favicon.ico'},
-        {
-          rel: 'stylesheet',
-          href: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
-          integrity: 'sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM',
-          crossorigin: 'anonymous'
-        }
-      ],
-      script: [
-        {
-          src: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js',
-          integrity: 'sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz',
-          crossorigin: 'anonymous',
-          defer: true
-        }
+        {rel: 'icon', href: '/favicon.ico'}
       ]
     }
   }

@@ -3,9 +3,12 @@
   import FormArea from '~/components/FormArea.vue'
   import InputField from '~/components/InputField.vue'
   import SubmitButton from '~/components/SubmitButton.vue'
-  import {accessJwtPost, accessUserPost} from '~/composables/ApiClient'
-  import {setJwt} from '~/composables/JwtManager'
-  import {validateEmail, validateName, validatePassword} from '~/composables/Validation'
+  import {
+    accessBff, bff_auth_route, bff_user_route
+  } from '~/composables/ApiClient'
+  import {
+    validateEmail, validateName, validatePassword
+  } from '~/composables/Validation'
   import {useAlertStore} from '~/stores'
   import type {Input, Resp} from '~/types'
 
@@ -39,15 +42,23 @@
 
   async function createUser(): Promise<void> {
     submitting.value = true
-    const resp1: Resp = await accessUserPost(
-      inputs.value[0].value, inputs.value[1].value, inputs.value[2].value
+    const resp1: Resp = await accessBff(
+      bff_user_route, 'POST',
+      {
+        email: inputs.value[0].value,
+        password: inputs.value[1].value,
+        name: inputs.value[2].value
+      }
     )
     if (resp1.status === 204) {
-      const resp2: Resp = await accessJwtPost(
-        inputs.value[0].value, inputs.value[1].value
+      const resp2: Resp = await accessBff(
+        bff_auth_route + 'login', 'POST',
+        {
+          email: inputs.value[0].value,
+          password: inputs.value[1].value
+        }
       )
-      setJwt(resp2.body.access_token)
-      router.push({name: 'index'})
+      router.push({name: resp2.status === 200 ? 'index' : 'login'})
     }
     else {
       alert.show(resp1.body.msg)

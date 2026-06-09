@@ -1,13 +1,11 @@
 import {describe, it, expect, vi, beforeEach} from 'vitest'
 import {
-  jwt_route, user_route,
-  accessJwtPost,
-  accessUserGet, accessUserPost, accessUserPatch, accessUserDelete
+  api_user_route, bff_auth_route,
+  accessBackend, accessApi, accessBff
 } from '~/composables/ApiClient'
-import {setJwt} from '~/composables/JwtManager'
 
 describe('ApiClient', () => {
-  function testFetch(status: number, json: any = null): void {
+  function testFetchResult(status: number, json?: any): void {
     vi.mocked(fetch).mockResolvedValue(
       {status, json: async() => json} as Response
     )
@@ -16,128 +14,62 @@ describe('ApiClient', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     vi.clearAllMocks()
-    setJwt()
+    globalThis.fetch = vi.fn()
   })
 
-  it('API access failed', async() => {
+  it('Access failed', async() => {
     vi.mocked(fetch).mockRejectedValue(new Error('Network Error'))
-    const promiseResp = accessUserGet()
-    vi.advanceTimersByTime(500)
+    const promiseResp = accessBackend({
+      route: '/not-accessible', init: {
+        method: 'GET', mode: 'cors', credentials: 'omit', headers: {}
+      }
+    })
+    vi.advanceTimersByTime(300)
     const resp = await promiseResp
     expect(resp.status).toBe(500)
-    expect(resp.body).toEqual({msg: 'API access failed'})
+    expect(resp.body).toEqual({msg: 'Unexpected error in network or server'})
   })
 
-  it('accessJwtPost', async() => {
-    testFetch(200, {access_token: 'test.jwt.value'})
-    const promiseResp = accessJwtPost('test@email.com', 'Test1234')
-    vi.advanceTimersByTime(500)
-    const resp = await promiseResp
-    expect(resp.status).toBe(200)
-    expect(resp.body).toEqual({access_token: 'test.jwt.value'})
-    expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining(jwt_route),
-      expect.objectContaining({
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer '
-        },
-        body: JSON.stringify({
-          email: 'test@email.com',
-          password: 'Test1234'
-        })
-      })
+  it('Access API', async() => {
+    testFetchResult(200, {email: 'test@email.com', password: 'Test'})
+    const promiseResp = accessApi(
+      api_user_route, 'GET', undefined, 'test.jwt.value'
     )
-  })
-
-  it('accessUserGet', async() => {
-    setJwt('test.jwt.value')
-    testFetch(200, {email: 'test@email.com', name: 'Test'})
-    const promiseResp = accessUserGet()
-    vi.advanceTimersByTime(500)
+    vi.advanceTimersByTime(300)
     const resp = await promiseResp
     expect(resp.status).toBe(200)
-    expect(resp.body).toEqual({email: 'test@email.com', name: 'Test'})
+    expect(resp.body).toEqual({email: 'test@email.com', password: 'Test'})
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining(user_route),
+      expect.stringContaining('/test-api' + api_user_route),
       expect.objectContaining({
         method: 'GET',
         mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer test.jwt.value'
-        }
+        credentials: 'omit',
+        headers: {'Authorization': 'Bearer test.jwt.value'}
       })
     )
   })
 
-  it('accessUserPost', async() => {
-    testFetch(204)
-    const promiseResp = accessUserPost('test@email.com', 'Test1234', 'Test')
-    vi.advanceTimersByTime(500)
+  it('Access BFF', async() => {
+    testFetchResult(200, {msg: 'Logged in successfully'})
+    const promiseResp = accessBff(
+      bff_auth_route + 'login', 'POST',
+      {email: 'test@email.com', password: 'Test1234'}
+    )
+    vi.advanceTimersByTime(300)
     const resp = await promiseResp
-    expect(resp.status).toBe(204)
+    expect(resp.status).toBe(200)
+    expect(resp.body).toEqual({msg: 'Logged in successfully'})
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining(user_route),
+      expect.stringContaining('/bff' + bff_auth_route + 'login'),
       expect.objectContaining({
         method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer '
-        },
+        mode: 'same-origin',
+        credentials: 'same-origin',
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          email: 'test@email.com',
-          password: 'Test1234',
-          name: 'Test'
+          email: 'test@email.com', password: 'Test1234'
         })
-      })
-    )
-  })
-
-  it('accessUserPatch', async() => {
-    setJwt('test.jwt.value')
-    testFetch(204)
-    const promiseResp = accessUserPatch({current_password: 'Test1234', name: 'Test'})
-    vi.advanceTimersByTime(500)
-    const resp = await promiseResp
-    expect(resp.status).toBe(204)
-    expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining(user_route),
-      expect.objectContaining({
-        method: 'PATCH',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer test.jwt.value'
-        },
-        body: JSON.stringify({
-          current_password: 'Test1234',
-          name: 'Test'
-        })
-      })
-    )
-  })
-
-  it('accessUserDelete', async() => {
-    setJwt('test.jwt.value')
-    testFetch(204)
-    const promiseResp = accessUserDelete()
-    vi.advanceTimersByTime(500)
-    const resp = await promiseResp
-    expect(resp.status).toBe(204)
-    expect(resp.body).toBe('')
-    expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining(user_route),
-      expect.objectContaining({
-        method: 'DELETE',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer test.jwt.value'
-        }
       })
     )
   })

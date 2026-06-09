@@ -1,4 +1,4 @@
-FROM python:3.14.2-slim-trixie AS base
+FROM python:3.14.5-slim-trixie AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -30,7 +30,7 @@ ENV APP_RUN_MODE=test
 RUN case "$TEST_MODE" in \
         "none") echo "skipped" > /app-test-log.txt ;; \
         "lax") pytest tests > /app-test-log.txt 2>&1 || true ;; \
-        "strict") pytest tests && echo "success" > /app-test-log.txt;; \
+        "strict") pytest tests && echo "success" > /app-test-log.txt ;; \
     esac
 RUN rm -rf tests && pip uninstall -y pytest
 
@@ -38,8 +38,7 @@ RUN rm -rf tests && pip uninstall -y pytest
 
 FROM base AS runner
 
-RUN groupadd -g 1000 app && \
-    useradd -u 1000 -g app -s /sbin/nologin app
+RUN useradd -u 12345 -U -s /sbin/nologin -m app
 
 COPY --from=tester /usr/local /usr/local
 COPY --from=tester /src .

@@ -14,14 +14,10 @@ match getenv('APP_RUN_MODE'):
                 'options': '-c statement_timeout=5000'
             }
         }
-        SQLALCHEMY_ECHO: bool = False
-        SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
         JWT_SECRET_KEY: str = getenv('JWT_SECRET_KEY')
         JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=7.0)
     case 'test':
         TESTING: bool = True
         SQLALCHEMY_DATABASE_URI: str = 'sqlite:///:memory:'
-        SQLALCHEMY_ECHO: bool = False
-        SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
-        JWT_SECRET_KEY: str = '32-plus-characters-recommended-for-security'
+        JWT_SECRET_KEY: str = 'secret_keys_should_be_32_bytes_or_longer'
         JWT_ACCESS_TOKEN_EXPIRES = timedelta(seconds=3.0)

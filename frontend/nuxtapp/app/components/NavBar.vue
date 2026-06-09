@@ -1,18 +1,19 @@
 <script setup lang="ts">
   import {BrandLogo, HamburgerMenu} from '~/components/SvgIcons'
-  import {setJwt} from '~/composables/JwtManager'
+  import {accessBff, bff_auth_route} from '~/composables/ApiClient'
   import {useUserStore} from '~/stores'
+  import type {Resp} from '~/types'
 
   const route = useRoute()
   const router = useRouter()
   const user = useUserStore()
 
-  function logout(): void {
-    setJwt()
-    if (route.name === 'index') {
-      router.go(0)
-    } else {
-      router.push({name: 'index'})
+  async function logout(): Promise<void> {
+    const resp: Resp = await accessBff(
+      bff_auth_route + 'logout', 'GET'
+    )
+    if (resp.status === 200) {
+      route.name === 'index' ? router.go(0) : router.push({name: 'index'})
     }
   }
 </script>

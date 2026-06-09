@@ -1,5 +1,16 @@
+interface Req {
+  route: string
+  init: { 
+    mode: 'cors'|'same-origin'
+    credentials: 'omit'|'same-origin'
+    headers: Record<string, string>
+    method: 'GET'|'POST'|'PATCH'|'DELETE'
+    body?: string
+  }
+}
+
 interface Resp {
-  status: number
+  status: ContentfulStatusCode
   body: any
 }
 
@@ -22,5 +33,5 @@ interface Input {
 }
 
 export type {
-  Resp, User, Alert, Input
+  Req, Resp, User, Alert, Input
 }

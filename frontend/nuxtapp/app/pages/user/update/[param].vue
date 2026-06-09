@@ -3,8 +3,10 @@
   import FormArea from '~/components/FormArea.vue'
   import InputField from '~/components/InputField.vue'
   import SubmitButton from '~/components/SubmitButton.vue'
-  import {accessUserPatch} from '~/composables/ApiClient'
-  import {validateEmail, validatePassword, validateName} from '~/composables/Validation'
+  import {accessBff, bff_user_route} from '~/composables/ApiClient'
+  import {
+    validateEmail, validatePassword, validateName
+  } from '~/composables/Validation'
   import {useAlertStore, useUserStore} from '~/stores'
   import type {Input, Resp} from '~/types'
 
@@ -17,7 +19,7 @@
     router.push('/404')
   }
 
-  useHead({title: 'update user'})
+  useHead({title: 'update ' + param})
 
   const alert = useAlertStore()
   const user = useUserStore()
@@ -57,10 +59,13 @@
 
   async function updateUser(): Promise<void> {
     submitting.value = true
-    const resp: Resp = await accessUserPatch({
-      current_password: inputs.value[0].value,
-      [param]: inputs.value[1].value
-    })
+    const resp: Resp = await accessBff(
+      bff_user_route, 'PATCH',
+      {
+        current_password: inputs.value[0].value,
+        [param]: inputs.value[1].value
+      }
+    )
     if (resp.status === 204) {
       router.push({name: 'index'})
     }
