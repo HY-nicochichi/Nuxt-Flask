@@ -1,35 +1,39 @@
 openapi: 3.1.0
 info:
-  title: Flask REST-API
-  version: 1.0.4
+  title: Flask REST API
 components:
   securitySchemes:
-    bearerAuth:
+    Authorization-AccessToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    Authorization-RefreshToken:
       type: http
       scheme: bearer
       bearerFormat: JWT
 tags:
-  - name: JWT
+  - name: Token
   - name: User
 paths:
-  /jwt/:
+  /tokens:
     post:
       tags:
-        - JWT
+        - Token
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - email
+                - password
               properties:
                 email:
                   type: string
-                  required: true
                   example: taro@email.com
                 password:
                   type: string
-                  required: true
                   example: Taro1234
       responses:
         '200':
@@ -42,12 +46,59 @@ paths:
                   access_token:
                     type: string
                     example: Json.Web.Token
-  /user/:
+                  refresh_token:
+                    type: string
+                    example: Json.Web.Token
+  /tokens/refresh:
+    post:
+      tags:
+        - Token
+      security:
+        - Authorization-RefreshToken: []
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: Json.Web.Token
+  /users:
+    post:
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - name
+              properties:
+                email:
+                  type: string
+                  example: taro@email.com
+                password:
+                  type: string
+                  example: Taro1234
+                name:
+                  type: string
+                  example: Taro
+      responses:
+        '204':
+          description: No Content
+  /users/me:
     get:
       tags:
         - User
       security:
-        - bearerAuth: []
+        - Authorization-AccessToken: []
       responses:
         '200':
           description: Success
@@ -62,58 +113,31 @@ paths:
                   name:
                     type: string
                     example: Taro
-    post:
-      tags:
-        - User
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  required: true
-                  example: taro@email.com
-                password:
-                  type: string
-                  required: true
-                  example: Taro1234
-                name:
-                  type: string
-                  required: true
-                  example: Taro
-      responses:
-        '204':
-          description: No Content
     patch:
       tags:
         - User
       security:
-        - bearerAuth: []
+        - Authorization-AccessToken: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - current_password
               properties:
                 current_password:
                   type: string
-                  required: true
                   example: Taro1234
                 email:
                   type: string
-                  required: false
                   example: new-taro@email.com
                 password:
                   type: string
-                  required: false
                   example: NewTaro1234
                 name:
                   type: string
-                  required: false
                   example: New Taro
       responses:
         '204':
@@ -122,7 +146,7 @@ paths:
       tags:
         - User
       security:
-        - bearerAuth: []
+        - Authorization-AccessToken: []
       responses:
         '204':
           description: No Content

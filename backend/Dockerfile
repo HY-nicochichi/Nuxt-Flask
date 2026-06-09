@@ -1,50 +1,30 @@
-FROM python:3.14.2-slim-trixie AS base
-
+FROM python:3.14.5-slim-trixie AS base
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV APP_RUN_MODE=production
-ENV APP_CONCURRENCY=20
-
-WORKDIR /src
-
-
-
-FROM base AS builder
-
+ENV PORT=8000
+ENV APP_CONCURRENCY=10
+WORKDIR /app
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt && \
-    rm -f requirements.txt
+RUN pip install --no-cache -r requirements.txt
+CMD ["gunicorn"]
 
-COPY cmd.sh .
-COPY flaskapi .
+
+FROM base AS base2
+COPY gunicorn.conf.py .
 COPY swagger.yaml .
+COPY src ./src
 
 
-
-FROM builder AS tester
-
-ARG TEST_MODE=strict
+FROM base AS dev
 ENV PYTEST_ADDOPTS="-p no:cacheprovider"
-ENV APP_RUN_MODE=test
-
-RUN case "$TEST_MODE" in \
-        "none") echo "skipped" > /app-test-log.txt ;; \
-        "lax") pytest tests > /app-test-log.txt 2>&1 || true ;; \
-        "strict") pytest tests && echo "success" > /app-test-log.txt;; \
-    esac
-RUN rm -rf tests && pip uninstall -y pytest
+RUN apt update -qq && \
+    apt install -y --no-install-recommends nodejs && \
+    rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache pytest==9.0.3 pyright==1.1.411
+COPY --from=base2 /app .
+COPY tests ./tests
 
 
-
-FROM base AS runner
-
-RUN groupadd -g 1000 app && \
-    useradd -u 1000 -g app -s /sbin/nologin app
-
-COPY --from=tester /usr/local /usr/local
-COPY --from=tester /src .
-COPY --from=tester /app-test-log.txt /var/log
-
+FROM base2 AS prod
+RUN useradd -u 12345 -U -s /sbin/nologin app
 USER app
-
-CMD ["sh", "cmd.sh"]

@@ -1,59 +1,21 @@
+from typing import cast
 from time import sleep
 from uuid import uuid7
 from json import dumps
-from models import User
-from . import (
-    client,
-    isolated_test_env,
-    create_db_data,
-    user_data,
-    auth_header,
-    json_header
+from werkzeug.test import TestResponse
+from src.models.user import User
+from tests import (
+    isolated_test_env, create_db_data, auth_header,
+    client, user_data, json_header
 )
 
-USER_ROUTE: str = '/user/'
+USER_ROUTE: str = '/users'
 
-class TestUserGet:
-    @isolated_test_env
-    def test_Missing_Authorization_header_401() -> None:
-        resp = client.get(USER_ROUTE)
-        assert resp.status_code == 401
-        assert resp.get_json() == {'msg': 'Missing Authorization Header'}
-
-    @isolated_test_env
-    def test_Error_loading_user_401() -> None:
-        bad_id = uuid7()
-        resp = client.get(
-            USER_ROUTE, headers=auth_header(bad_id)
-        )
-        assert resp.status_code == 401
-        assert resp.get_json() == {'msg': f'Error loading the user {bad_id}'}
-
-    @isolated_test_env
-    def test_Get_user_info_200() -> None:
-        user: User = create_db_data(User, **user_data)
-        resp = client.get(
-            USER_ROUTE, headers=auth_header(user.id)
-        )
-        assert resp.status_code == 200
-        assert resp.get_json() == {'email': user.email, 'name': user.name}
-
-    @isolated_test_env
-    def test_Token_has_expired_401() -> None:
-        user: User = create_db_data(User, **user_data)
-        expired_auth_header = auth_header(user.id)
-        sleep(3.0)
-        resp = client.get(
-            USER_ROUTE, headers=expired_auth_header
-        )
-        assert resp.status_code == 401
-        assert resp.get_json() == {'msg': 'Token has expired'}
-
-class TestUserPost:
+class TestCreateUser:
     @isolated_test_env
     def test_Email_already_taken_409() -> None:
         user: User = create_db_data(User, **user_data)
-        resp = client.post(
+        resp: TestResponse = client.post(
             USER_ROUTE,
             headers=json_header,
             data=dumps({
@@ -64,19 +26,58 @@ class TestUserPost:
         assert resp.get_json() == {'msg': 'Email already taken'}
 
     @isolated_test_env
-    def test_User_created_204() -> None:
-        resp = client.post(
+    def test_Create_user_204() -> None:
+        resp: TestResponse = client.post(
             USER_ROUTE, headers=json_header, data=dumps(user_data)
         )
         assert resp.status_code == 204
-        assert len(User.all()) == 1
+        user: User = User.all()[0]
+        assert user.to_dict(include={'email', 'name'}) == {
+            'email': user_data['email'], 'name': user_data['name']
+        } and user.check_password(user_data['password'])
 
-class TestUserPatch:
+class TestGetMe:
+    @isolated_test_env
+    def test_Missing_Authorization_header_401() -> None:
+        resp: TestResponse = client.get(f'{USER_ROUTE}/me')
+        assert resp.status_code == 401
+        assert resp.get_json() == {'msg': 'Missing Authorization Header'}
+
+    @isolated_test_env
+    def test_Error_loading_user_401() -> None:
+        bad_id = uuid7()
+        resp: TestResponse = client.get(
+            f'{USER_ROUTE}/me', headers=auth_header(bad_id)
+        )
+        assert resp.status_code == 401
+        assert resp.get_json() == {'msg': f'Error loading the user {bad_id}'}
+
+    @isolated_test_env
+    def test_Get_me_200() -> None:
+        user: User = create_db_data(User, **user_data)
+        resp: TestResponse = client.get(
+            f'{USER_ROUTE}/me', headers=auth_header(user.id)
+        )
+        assert resp.status_code == 200
+        assert resp.get_json() == user.to_dict(include={'email', 'name'})
+
+    @isolated_test_env
+    def test_Token_has_expired_401() -> None:
+        user: User = create_db_data(User, **user_data)
+        expired_auth_header = auth_header(user.id)
+        sleep(3.0)
+        resp: TestResponse = client.get(
+            f'{USER_ROUTE}/me', headers=expired_auth_header
+        )
+        assert resp.status_code == 401
+        assert resp.get_json() == {'msg': 'Token has expired'}
+
+class TestUpdateMe:
     @isolated_test_env
     def test_No_params_to_update_422() -> None:
         user: User = create_db_data(User, **user_data)
-        resp = client.patch(
-            USER_ROUTE,
+        resp: TestResponse = client.patch(
+            f'{USER_ROUTE}/me',
             headers=auth_header(user.id)|json_header,
             data=dumps({'current_password': user_data['password']})
         )
@@ -86,8 +87,8 @@ class TestUserPatch:
     @isolated_test_env
     def test_Invalid_current_password_422() -> None:
         user: User = create_db_data(User, **user_data)
-        resp = client.patch(
-            USER_ROUTE,
+        resp: TestResponse = client.patch(
+            f'{USER_ROUTE}/me',
             headers=auth_header(user.id)|json_header,
             data=dumps({
                 'current_password': 'WrongPassword1234', 'email': 'new-taro@email.com'
@@ -99,8 +100,8 @@ class TestUserPatch:
     @isolated_test_env
     def test_Email_already_taken_409() -> None:
         user: User = create_db_data(User, **user_data)
-        resp = client.patch(
-            USER_ROUTE,
+        resp: TestResponse = client.patch(
+            f'{USER_ROUTE}/me',
             headers=auth_header(user.id)|json_header,
             data=dumps({
                 'current_password': user_data['password'], 'email': user.email
@@ -110,10 +111,10 @@ class TestUserPatch:
         assert resp.get_json() == {'msg': 'Email already taken'}
 
     @isolated_test_env
-    def test_User_updated_204() -> None:
+    def test_Update_me_204() -> None:
         user: User = create_db_data(User, **user_data)
-        resp = client.patch(
-            USER_ROUTE,
+        resp: TestResponse = client.patch(
+            f'{USER_ROUTE}/me',
             headers=auth_header(user.id)|json_header,
             data=dumps({
                 'current_password': user_data['password'],
@@ -123,17 +124,17 @@ class TestUserPatch:
             })
         )
         assert resp.status_code == 204
-        updated_user: User = User.find_by(id=user.id)
-        assert updated_user.email == 'new-taro@email.com'
-        assert updated_user.is_password_matched('NewTaro1234')
-        assert updated_user.name == 'New Taro'
+        user = cast(User, User.find_by(id=user.id))
+        assert user.to_dict(include={'email', 'name'}) == {
+            'email': 'new-taro@email.com', 'name': 'New Taro'
+        } and user.check_password('NewTaro1234')
 
-class TestUserDelete:
+class TestDeleteMe:
     @isolated_test_env
-    def test_User_deleted_204() -> None:
+    def test_Delete_me_204() -> None:
         user: User = create_db_data(User, **user_data)
-        resp = client.delete(
-            USER_ROUTE, headers=auth_header(user.id)
+        resp: TestResponse = client.delete(
+            f'{USER_ROUTE}/me', headers=auth_header(user.id)
         )
         assert resp.status_code == 204
-        assert len(User.all()) == 0
+        assert User.find_by(id=user.id) is None
