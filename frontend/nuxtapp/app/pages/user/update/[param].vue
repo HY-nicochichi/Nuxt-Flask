@@ -3,7 +3,7 @@
   import FormArea from '~/components/FormArea.vue'
   import InputField from '~/components/InputField.vue'
   import SubmitButton from '~/components/SubmitButton.vue'
-  import {accessProtectedBff, bff_user_route} from '~/composables/ApiClient'
+  import {accessProtectedBff, bffUserRoute} from '~/composables/ApiClient'
   import {
     validateEmail, validatePassword, validateName
   } from '~/composables/Validation'
@@ -60,7 +60,7 @@
   async function updateUser(): Promise<void> {
     submitting.value = true
     const resp: Resp = await accessProtectedBff(
-      bff_user_route + '/me', 'PATCH',
+      bffUserRoute + '/me', 'PATCH',
       {
         current_password: inputs.value[0].value,
         [param]: inputs.value[1].value

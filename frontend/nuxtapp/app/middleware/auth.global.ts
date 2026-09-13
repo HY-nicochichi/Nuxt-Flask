@@ -1,6 +1,4 @@
-import {
-  accessProtectedBff, bff_user_route
-} from '~/composables/ApiClient'
+import {accessProtectedBff, bffUserRoute} from '~/composables/ApiClient'
 import {useAlertStore, useUserStore} from '~/stores'
 import type {Resp} from '~/types'
 
@@ -8,7 +6,7 @@ export default defineNuxtRouteMiddleware(async(to, _) => {
   useAlertStore().clear()
   const user = useUserStore()
 
-  const resp: Resp = await accessProtectedBff(bff_user_route + '/me', 'GET')
+  const resp: Resp = await accessProtectedBff(bffUserRoute + '/me', 'GET')
   resp.status === 200 ? user.login(resp.body.email, resp.body.name) : user.clear()
 
   const NoAuthRoutes: string[] = ['login', 'user-new']

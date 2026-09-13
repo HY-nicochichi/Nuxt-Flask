@@ -1,40 +1,36 @@
 import {Hono} from 'hono'
-import {getCookie} from 'hono/cookie'
-import {decryptToken} from './encrypt'
-import {accessApi, api_user_route} from '~/composables/ApiClient'
+import {getTokenCookie} from '~/bff/cookie'
+import {accessApi, apiUserRoute} from '~/composables/ApiClient'
 import type {Resp} from '~/types'
 
-const user_router = new Hono()
+const userRouter = new Hono()
 
-user_router.post('', async(c) => {
+userRouter.post('', async(c) => {
   const resp: Resp = await accessApi(
-    api_user_route, 'POST', await c.req.json()
+    apiUserRoute, 'POST', await c.req.json()
   )
   return resp.status === 204 ? c.body(null, 204) : c.json(resp.body, resp.status)
 })
 
-user_router.get('/me', async(c) => {
+userRouter.get('/me', async(c) => {
   const resp: Resp = await accessApi(
-    api_user_route + '/me', 'GET', undefined,
-    decryptToken(getCookie(c, 'access_token_enc'))
+    apiUserRoute + '/me', 'GET', undefined, await getTokenCookie(c, 'access')
   )
   return c.json(resp.body, resp.status)
 })
 
-user_router.patch('/me', async(c) => {
+userRouter.patch('/me', async(c) => {
   const resp: Resp = await accessApi(
-    api_user_route + '/me', 'PATCH', await c.req.json(),
-    decryptToken(getCookie(c, 'access_token_enc'))
+    apiUserRoute + '/me', 'PATCH', await c.req.json(), await getTokenCookie(c, 'access')
   )
   return resp.status === 204 ? c.body(null, 204) : c.json(resp.body, resp.status)
 })
 
-user_router.delete('/me', async(c) => {
+userRouter.delete('/me', async(c) => {
   const resp: Resp = await accessApi(
-    api_user_route + '/me', 'DELETE', undefined,
-    decryptToken(getCookie(c, 'access_token_enc'))
+    apiUserRoute + '/me', 'DELETE', undefined, await getTokenCookie(c, 'access')
   ) 
   return resp.status === 204 ? c.body(null, 204) : c.json(resp.body, resp.status)
 })
 
-export default user_router
+export default userRouter

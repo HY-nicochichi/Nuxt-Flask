@@ -4,7 +4,7 @@
   import InputField from '~/components/InputField.vue'
   import SubmitButton from '~/components/SubmitButton.vue'
   import {
-    accessBff, bff_auth_route, bff_user_route
+    accessBff, bffAuthRoute, bffUserRoute
   } from '~/composables/ApiClient'
   import {
     validateEmail, validateName, validatePassword
@@ -43,7 +43,7 @@
   async function createUser(): Promise<void> {
     submitting.value = true
     const resp1: Resp = await accessBff(
-      bff_user_route, 'POST',
+      bffUserRoute, 'POST',
       {
         email: inputs.value[0].value,
         password: inputs.value[1].value,
@@ -52,7 +52,7 @@
     )
     if (resp1.status === 204) {
       const resp2: Resp = await accessBff(
-        bff_auth_route + '/login', 'POST',
+        bffAuthRoute + '/login', 'POST',
         {
           email: inputs.value[0].value,
           password: inputs.value[1].value

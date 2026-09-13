@@ -20,7 +20,7 @@ ENV PYTEST_ADDOPTS="-p no:cacheprovider"
 RUN apt update -qq && \
     apt install -y --no-install-recommends nodejs && \
     rm -rf /var/lib/apt/lists/*
-RUN pip install --no-cache pytest==9.0.3 pyright==1.1.411
+RUN pip install --no-cache pytest==9.1.1 pyright==1.1.414
 COPY --from=base2 /app .
 COPY tests ./tests
 

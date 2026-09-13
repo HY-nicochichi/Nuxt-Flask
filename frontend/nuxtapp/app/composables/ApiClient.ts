@@ -1,10 +1,12 @@
 import type {Req, Resp} from '~/types'
 
-const api_token_route: string = '/tokens'
-const api_user_route: string = '/users'
+const apiUrlBase: string = process.env.API_URL_BASE as string
 
-const bff_auth_route: string = '/auth'
-const bff_user_route: string = '/users'
+const apiTokenRoute: string = '/tokens'
+const apiUserRoute: string = '/users'
+
+const bffAuthRoute: string = '/auth'
+const bffUserRoute: string = '/users'
 
 async function accessBackend(req: Req): Promise<Resp> {
   await new Promise(r => setTimeout(r, 300))  // simulate network delay
@@ -30,7 +32,7 @@ async function accessApi(
   token?: string
 ): Promise<Resp> {
   const req: Req = {
-    route: process.env.API_URL_BASE + route,
+    route: apiUrlBase + route,
     init: {
       credentials: 'omit',
       method: method,
@@ -71,7 +73,7 @@ async function accessProtectedBff(
 ): Promise<Resp> {
   let resp: Resp = await accessBff(route, method, body)
   if (resp.status === 401 && resp.body.msg === 'Token has expired') {
-    const refreshResp: Resp = await accessBff(bff_auth_route + '/refresh', 'POST')
+    const refreshResp: Resp = await accessBff(bffAuthRoute + '/refresh', 'POST')
     if (refreshResp.status === 200) {
       resp = await accessBff(route, method, body)
     }
@@ -80,7 +82,6 @@ async function accessProtectedBff(
 }
 
 export {
-  api_token_route, api_user_route,
-  bff_auth_route, bff_user_route,
+  apiUrlBase, apiTokenRoute, apiUserRoute, bffAuthRoute, bffUserRoute,
   accessBackend, accessApi, accessBff, accessProtectedBff
 }

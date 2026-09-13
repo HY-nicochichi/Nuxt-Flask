@@ -9,8 +9,7 @@ describe('Validation', () => {
     })
 
     it('Invalid email length', () => {
-      expect(validateEmail('a@b.com')).toBe(false)
-      expect(validateEmail('a'.repeat(41) + '@email.com')).toBe(false)
+      expect(validateEmail('a'.repeat(91) + '@email.com')).toBe(false)
     })
 
     it('Invalid email format', () => {
@@ -27,7 +26,7 @@ describe('Validation', () => {
 
     it('Invalid password length', () => {
       expect(validatePassword('Test123')).toBe(false)
-      expect(validatePassword('A' + 'a'.repeat(20))).toBe(false)
+      expect(validatePassword('Test' + '0'.repeat(20))).toBe(false)
     })
 
     it('Invalid password format', () => {

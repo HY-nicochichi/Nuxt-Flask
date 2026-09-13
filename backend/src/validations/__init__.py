@@ -34,8 +34,8 @@ def validate_str(regex: str, message: LiteralString) -> Callable[[str], str]:
     return _validate_str
 
 validate_email: Callable[[str], str] = validate_str(
-    r'^(?=.{10,50}$)[a-z0-9.-]+@[a-z0-9-]+\.[a-z0-9.-]+$',
-    'Email must be 10-50 characters and in a standard email format'
+    r'^(?=.{6,100}$)[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+    'Email must be 6-100 characters and in a standard email format'
 )
 validate_password: Callable[[str], str] = validate_str(
     r'^(?=.{8,20}$)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])[a-zA-Z0-9]+$',

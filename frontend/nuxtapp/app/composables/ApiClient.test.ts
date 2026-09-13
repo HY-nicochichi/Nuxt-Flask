@@ -1,6 +1,6 @@
 import {describe, it, expect, vi, beforeEach} from 'vitest'
 import {
-  api_user_route, bff_auth_route,
+  apiUrlBase, apiUserRoute, bffAuthRoute, bffUserRoute,
   accessBackend, accessApi, accessBff, accessProtectedBff
 } from '~/composables/ApiClient'
 
@@ -33,14 +33,14 @@ describe('ApiClient', () => {
   it('Access API', async() => {
     testFetchResult(200, {email: 'test@email.com', password: 'Test1234'})
     const promiseResp = accessApi(
-      api_user_route + '/me', 'GET', undefined, 'test.jwt.value'
+      apiUserRoute + '/me', 'GET', undefined, 'test.jwt.value'
     )
     await vi.advanceTimersByTimeAsync(300)
     const resp = await promiseResp
     expect(resp.status).toBe(200)
     expect(resp.body).toEqual({email: 'test@email.com', password: 'Test1234'})
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining(process.env.API_URL_BASE + api_user_route + '/me'),
+      expect.stringContaining(apiUrlBase + apiUserRoute + '/me'),
       expect.objectContaining({
         method: 'GET',
         credentials: 'omit',
@@ -52,7 +52,7 @@ describe('ApiClient', () => {
   it('Access BFF', async() => {
     testFetchResult(200, {msg: 'Logged in successfully'})
     const promiseResp = accessBff(
-      bff_auth_route + '/login', 'POST',
+      bffAuthRoute + '/login', 'POST',
       {email: 'test@email.com', password: 'Test1234'}
     )
     await vi.advanceTimersByTimeAsync(300)
@@ -60,7 +60,7 @@ describe('ApiClient', () => {
     expect(resp.status).toBe(200)
     expect(resp.body).toEqual({msg: 'Logged in successfully'})
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/bff' + bff_auth_route + '/login'),
+      expect.stringContaining('/bff' + bffAuthRoute + '/login'),
       expect.objectContaining({
         method: 'POST',
         credentials: 'same-origin',
@@ -74,7 +74,7 @@ describe('ApiClient', () => {
 
   it('Access protected BFF', async() => {
     testFetchResult(200, {email: 'test@email.com', name: 'Test'})
-    const promiseRespNormal = accessProtectedBff('/users/me', 'GET')
+    const promiseRespNormal = accessProtectedBff(bffUserRoute + '/me', 'GET')
     await vi.advanceTimersByTimeAsync(300) 
     const respNormal = await promiseRespNormal
     expect(respNormal.status).toBe(200)
@@ -94,7 +94,7 @@ describe('ApiClient', () => {
         status: 200,
         json: async() => ({email: 'test@email.com', name: 'Test'})
       } as Response))
-    const promiseRespRetry = accessProtectedBff('/users/me', 'GET')
+    const promiseRespRetry = accessProtectedBff(bffUserRoute + '/me', 'GET')
     await vi.advanceTimersByTimeAsync(900)
     const respRetry = await promiseRespRetry
     expect(respRetry.status).toBe(200)
@@ -102,7 +102,7 @@ describe('ApiClient', () => {
     expect(fetch).toHaveBeenCalledTimes(3)
     expect(fetch).toHaveBeenNthCalledWith(
       2,
-      expect.stringContaining('/bff' + bff_auth_route + '/refresh'),
+      expect.stringContaining('/bff' + bffAuthRoute + '/refresh'),
       expect.objectContaining({method: 'POST'})
     )
   })

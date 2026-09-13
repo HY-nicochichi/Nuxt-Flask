@@ -6,9 +6,7 @@
 
 <template>
   <div class="text-white">
-    <NuxtLoadingIndicator
-      color="deeppink" :height="5"
-    />
+    <NuxtLoadingIndicator color="deeppink" :height="5"/>
     <NavBar/>
     <div class="p-3">
       <NuxtPage/>

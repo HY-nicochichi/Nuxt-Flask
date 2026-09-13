@@ -2,7 +2,7 @@
   import {LoadingSpinner} from '~/components/SvgIcons'
   import FormArea from '~/components/FormArea.vue'
   import {
-    accessProtectedBff, bff_user_route, bff_auth_route
+    accessProtectedBff, bffUserRoute, bffAuthRoute
   } from '~/composables/ApiClient'
   import {useUserStore} from '~/stores'
   import type {Resp} from '~/types'
@@ -17,9 +17,9 @@
   async function deleteUser(): Promise<void> {
     if (confirm('Comfirm user deletion?')) {
       deleting.value = true
-      const resp: Resp = await accessProtectedBff(bff_user_route + '/me', 'DELETE')
+      const resp: Resp = await accessProtectedBff(bffUserRoute + '/me', 'DELETE')
       if (resp.status === 204) {
-        await accessProtectedBff(bff_auth_route + '/logout', 'GET')
+        await accessProtectedBff(bffAuthRoute + '/logout', 'GET')
         router.push({name: 'index'})
       }
       deleting.value = false

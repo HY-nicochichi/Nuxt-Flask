@@ -1,11 +1,12 @@
 import {Hono} from 'hono'
-import auth_router from './auth'
-import user_router from './user'
+import {bffAuthRoute, bffUserRoute} from '~/composables/ApiClient'
+import authRouter from '~/bff/auth'
+import userRouter from '~/bff/user'
 
 const app = new Hono().basePath('/bff')
 
-app.route('/auth', auth_router)
-app.route('/users', user_router)
+app.route(bffAuthRoute, authRouter)
+app.route(bffUserRoute, userRouter)
 
 export default defineEventHandler((event) => {
   return app.fetch(toWebRequest(event))

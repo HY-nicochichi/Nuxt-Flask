@@ -1,5 +1,5 @@
 function validateEmail(val: string): boolean {
-  return /^(?=.{10,50}$)[a-z0-9.-]+@[a-z0-9-]+\.[a-z0-9.-]+$/.test(val)
+  return /^(?=.{6,100}$)[a-zA-Z0-9._+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(val)
 }
 
 function validatePassword(val: string): boolean {

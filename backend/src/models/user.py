@@ -13,7 +13,7 @@ pwd_hasher = PasswordHasher(time_cost=2, memory_cost=19456, parallelism=1)
 
 class User(AppModel):
     __tablename__ = 'users'
-    email: Mapped[str] = mapped_column(String(50), unique=True)
+    email: Mapped[str] = mapped_column(String(100), unique=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     name: Mapped[str] = mapped_column(String(30))
 
