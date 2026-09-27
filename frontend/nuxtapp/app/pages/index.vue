@@ -4,5 +4,5 @@
 
 
 <template>
-  <h4 class="fw-bolder">Nuxt-Flask Auth App</h4>
+  <h1 class="fs-4 fw-bolder">Nuxt-Flask Auth App</h1>
 </template>

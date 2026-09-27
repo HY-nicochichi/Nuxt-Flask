@@ -1,6 +1,5 @@
 <script setup lang="ts">
   import {LoadingSpinner} from '~/components/SvgIcons'
-  import FormArea from '~/components/FormArea.vue'
   import {
     accessProtectedBff, bffUserRoute, bffAuthRoute
   } from '~/composables/ApiClient'
@@ -29,26 +28,42 @@
 
 
 <template>
-  <h4 class="fw-bolder mb-3">user info</h4>
-  <FormArea>
+  <h1 class="fs-4 fw-bolder mb-3">user info</h1>
+  <section role="group" class="col-sm-9 col-md-7 col-lg-5 bg-primary bg-opacity-25 p-3">
     <div class="mb-2">name：{{ user.value.name }}</div>
     <NuxtLink to="/user/update/name" class="btn btn-primary">
       update
     </NuxtLink>
-    <hr class="border-white">
+    <hr>
     <div class="mb-2">email：{{ user.value.email }}</div>
     <NuxtLink to="/user/update/email" class="btn btn-primary">
       update
     </NuxtLink>
-    <hr class="border-white">
+    <hr>
     <div class="mb-2">password：＊＊＊＊＊＊＊＊</div>
     <NuxtLink to="/user/update/password" class="btn btn-primary">
       update
     </NuxtLink>
-  </FormArea>
+  </section>
   <br>
   <NuxtLink class="btn btn-danger" @click.prevent="deleteUser">
     <LoadingSpinner v-if="deleting" class="mx-4" :size="'25'" :color="'white'"/>
     <span v-else>delete user</span>
   </NuxtLink>
 </template>
+
+
+<style scoped>
+  section {
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 0.5rem;
+    border-color: var(--color-text);
+  }
+
+  hr {
+    border-style: solid;
+    border-width: 1px;
+    border-color: var(--color-text);
+  }
+</style>

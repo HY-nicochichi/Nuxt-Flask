@@ -14,7 +14,7 @@ describe('AlertBox', () => {
     return {
       self,
       elements: () => {
-        return {alert: self.find('div')}
+        return {alert: self.find('aside')}
       }
     }
   }

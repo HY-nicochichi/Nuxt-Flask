@@ -1,1 +1,13 @@
-@import "bootstrap/scss/bootstrap"
+@import "bootstrap/scss/bootstrap";
+
+:root {
+  --color-bg: rgb(0, 0, 60);
+  --color-text: white;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --color-bg: rgb(220, 220, 255);
+    --color-text: black;
+  }
+}

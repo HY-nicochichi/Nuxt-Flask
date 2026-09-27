@@ -6,7 +6,17 @@
 
 
 <template>
-  <div v-if="alert.value.show" class="bg-danger bg-opacity-50 border border-danger rounded mb-3 px-3 py-2">
+  <aside v-if="alert.value.show" role="alert" class="bg-danger bg-opacity-50 mb-3 p-2">
     ※ {{ alert.value.msg }}
-  </div>
+  </aside>
 </template>
+
+
+<style scoped>
+  aside {
+    border-style: solid;
+    border-width: 1.5px;
+    border-radius: 0.25rem;
+    border-color: var(--color-text);
+  }
+</style>

@@ -52,7 +52,7 @@
 
 <template>
   <AlertBox/>
-  <h4 class="fw-bolder mb-3">login</h4>
+  <h1 class="fs-4 fw-bolder mb-3">login</h1>
   <FormArea>
     <InputField
       v-for="(input, index) in inputs" :key="index"
