@@ -1,6 +1,6 @@
 import {Context} from 'hono'
 import {getSignedCookie, setSignedCookie, deleteCookie} from 'hono/cookie'
-import {bffAuthRoute} from '~/composables/ApiClient'
+import {bffUrlBase, bffAuthRoute} from '~/composables/ApiClient'
 
 const bffCookieSecret: string = process.env.BFF_COOKIE_SECRET as string
 const forceSslCookie: boolean = process.env.FORCE_SSL_COOKIE === '1'
@@ -18,13 +18,13 @@ async function setTokenCookie(
     httpOnly: true,
     secure: forceSslCookie,
     sameSite: 'Strict',
-    path: '/bff' + (type === 'refresh' ? bffAuthRoute : '')
+    path: bffUrlBase + (type === 'refresh' ? bffAuthRoute : '')
   })
 }
 
 function deleteTokenCookie(c: Context, type: 'access'|'refresh'): void {
   deleteCookie(c, type + '_token', {
-    path: '/bff' + (type === 'refresh' ? bffAuthRoute : '')
+    path: bffUrlBase + (type === 'refresh' ? bffAuthRoute : '')
   })
 }
 

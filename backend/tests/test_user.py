@@ -26,11 +26,11 @@ class TestCreateUser:
         assert resp.get_json() == {'msg': 'Email already taken'}
 
     @isolated_test_env
-    def test_Create_user_204() -> None:
+    def test_Create_user_201() -> None:
         resp: TestResponse = client.post(
             USER_ROUTE, headers=json_header, data=dumps(user_data)
         )
-        assert resp.status_code == 204
+        assert resp.status_code == 201
         user: User = User.all()[0]
         assert user.to_dict(include={'email', 'name'}) == {
             'email': user_data['email'], 'name': user_data['name']

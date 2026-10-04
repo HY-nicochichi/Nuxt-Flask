@@ -9,8 +9,8 @@ interface Req {
 }
 
 interface Resp {
-  status: ContentfulStatusCode
-  body: any
+  status: number
+  data?: Record<string, any>
 }
 
 interface User {

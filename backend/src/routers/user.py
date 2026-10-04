@@ -15,7 +15,7 @@ def create_user(data: CreateUser) -> tuple[Response, int]:
         return jsonify(msg='Email already taken'), 409
     with db_transaction():
         User.create(**data.model_dump())
-    return Response(content_type='application/json'), 204
+    return Response(headers={'Location': '/users/me'}), 201
 
 @bp_user.get('/me')
 @jwt_required()
@@ -37,11 +37,11 @@ def update_me(data: UpdateMe) -> tuple[Response, int]:
         return jsonify(msg='Email already taken'), 409
     with db_transaction():
         current_user.update(**new_values)
-    return Response(content_type='application/json'), 204
+    return Response(), 204
 
 @bp_user.delete('/me')
 @jwt_required()
 def delete_me() -> tuple[Response, int]:
     with db_transaction():
         current_user.delete()
-    return Response(content_type='application/json'), 204
+    return Response(), 204

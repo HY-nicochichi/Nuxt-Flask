@@ -1,4 +1,5 @@
 import {Hono} from 'hono'
+import type {ContentfulStatusCode} from 'hono/utils/http-status'
 import {getTokenCookie, setTokenCookie, deleteTokenCookie} from '~/bff/cookie'
 import {accessApi, apiTokenRoute} from '~/composables/ApiClient'
 import type {Resp} from '~/types'
@@ -10,12 +11,12 @@ authRouter.post('/login', async(c) => {
     apiTokenRoute, 'POST', await c.req.json()
   )
   if (resp.status === 200) {
-    await setTokenCookie(c, 'access', resp.body.access_token)
-    await setTokenCookie(c, 'refresh', resp.body.refresh_token)
+    await setTokenCookie(c, 'access', resp.data?.access_token)
+    await setTokenCookie(c, 'refresh', resp.data?.refresh_token)
     return c.json({msg: 'Logged in successfully'}, 200)
   }
   else {
-    return c.json(resp.body, resp.status)
+    return c.json(resp.data, resp.status as ContentfulStatusCode)
   }
 })
 
@@ -24,11 +25,11 @@ authRouter.post('/refresh', async(c) => {
     apiTokenRoute + '/refresh', 'POST', undefined, await getTokenCookie(c, 'refresh')
   )
   if (resp.status === 200) {
-    await setTokenCookie(c, 'access', resp.body.access_token)
+    await setTokenCookie(c, 'access', resp.data?.access_token)
     return c.json({msg: 'Refreshed successfully'}, 200)
   }
   else {
-    return c.json(resp.body, resp.status)
+    return c.json(resp.data, resp.status as ContentfulStatusCode)
   }
 })
 

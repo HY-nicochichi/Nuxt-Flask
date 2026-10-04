@@ -1,5 +1,5 @@
 from typing import cast
-from flask import Flask, g
+from flask import Flask, Response, g
 from flask_jwt_extended import JWTManager
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -29,7 +29,26 @@ class ORMapper:
         if session is not None:
             session.close()
 
+class NoResBody:
+    def __init__(self, app: Flask|None = None) -> None:
+        if app is not None:
+            self.init_app(app)
+
+    def init_app(self, app: Flask) -> None:
+        app.after_request(self.fix_headers)
+        app.extensions['no_res_body'] = self
+
+    @staticmethod
+    def fix_headers(response: Response) -> Response:
+        if response.status_code == 201 and response.get_data() == b'':
+            response.headers.pop('Content-Type', default=None)
+        if response.status_code == 204:
+            response.headers.pop('Content-Type', default=None)
+            response.headers.pop('Content-Length', default=None)
+        return response
+
 orm = ORMapper()
 jwt = JWTManager()
+no_res_body = NoResBody()
 
-extensions: tuple[ORMapper, JWTManager] = (orm, jwt)
+extensions: tuple[ORMapper, JWTManager, NoResBody] = (orm, jwt, no_res_body)

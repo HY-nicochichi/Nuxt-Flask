@@ -1,6 +1,7 @@
 import {describe, it, expect, vi, beforeEach} from 'vitest'
 import {
-  apiUrlBase, apiUserRoute, bffAuthRoute, bffUserRoute,
+  apiUrlBase, apiUserRoute,
+  bffUrlBase, bffAuthRoute, bffUserRoute,
   accessBackend, accessApi, accessBff, accessProtectedBff
 } from '~/composables/ApiClient'
 
@@ -27,7 +28,7 @@ describe('ApiClient', () => {
     await vi.advanceTimersByTimeAsync(300)
     const resp = await promiseResp
     expect(resp.status).toBe(500)
-    expect(resp.body).toEqual({msg: 'Unexpected error in network or server'})
+    expect(resp.data).toEqual({msg: 'Unexpected error in network or server'})
   })
 
   it('Access API', async() => {
@@ -38,7 +39,7 @@ describe('ApiClient', () => {
     await vi.advanceTimersByTimeAsync(300)
     const resp = await promiseResp
     expect(resp.status).toBe(200)
-    expect(resp.body).toEqual({email: 'test@email.com', password: 'Test1234'})
+    expect(resp.data).toEqual({email: 'test@email.com', password: 'Test1234'})
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining(apiUrlBase + apiUserRoute + '/me'),
       expect.objectContaining({
@@ -58,9 +59,9 @@ describe('ApiClient', () => {
     await vi.advanceTimersByTimeAsync(300)
     const resp = await promiseResp
     expect(resp.status).toBe(200)
-    expect(resp.body).toEqual({msg: 'Logged in successfully'})
+    expect(resp.data).toEqual({msg: 'Logged in successfully'})
     expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/bff' + bffAuthRoute + '/login'),
+      expect.stringContaining(bffUrlBase + bffAuthRoute + '/login'),
       expect.objectContaining({
         method: 'POST',
         credentials: 'same-origin',
@@ -78,7 +79,7 @@ describe('ApiClient', () => {
     await vi.advanceTimersByTimeAsync(300) 
     const respNormal = await promiseRespNormal
     expect(respNormal.status).toBe(200)
-    expect(respNormal.body).toEqual({email: 'test@email.com', name: 'Test'})
+    expect(respNormal.data).toEqual({email: 'test@email.com', name: 'Test'})
     expect(fetch).toHaveBeenCalledTimes(1)
     vi.clearAllMocks()
     vi.mocked(fetch)
@@ -88,7 +89,7 @@ describe('ApiClient', () => {
       } as Response))
       .mockImplementationOnce(async() => ({
         status: 200,
-        json: async() => ({msg: 'Refreshed'})
+        json: async() => ({msg: 'Refreshed successfully'})
       } as Response))
       .mockImplementationOnce(async() => ({
         status: 200,
@@ -98,11 +99,11 @@ describe('ApiClient', () => {
     await vi.advanceTimersByTimeAsync(900)
     const respRetry = await promiseRespRetry
     expect(respRetry.status).toBe(200)
-    expect(respRetry.body).toEqual({email: 'test@email.com', name: 'Test'})
+    expect(respRetry.data).toEqual({email: 'test@email.com', name: 'Test'})
     expect(fetch).toHaveBeenCalledTimes(3)
     expect(fetch).toHaveBeenNthCalledWith(
       2,
-      expect.stringContaining('/bff' + bffAuthRoute + '/refresh'),
+      expect.stringContaining(bffUrlBase + bffAuthRoute + '/refresh'),
       expect.objectContaining({method: 'POST'})
     )
   })

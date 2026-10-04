@@ -4,9 +4,7 @@
   import InputField from '~/components/InputField.vue'
   import SubmitButton from '~/components/SubmitButton.vue'
   import {accessProtectedBff, bffUserRoute} from '~/composables/ApiClient'
-  import {
-    validateEmail, validatePassword, validateName
-  } from '~/composables/Validation'
+  import {validateEmail, validatePassword, validateName} from '~/composables/Validation'
   import {useAlertStore, useUserStore} from '~/stores'
   import type {Input, Resp} from '~/types'
 
@@ -60,8 +58,7 @@
   async function updateUser(): Promise<void> {
     submitting.value = true
     const resp: Resp = await accessProtectedBff(
-      bffUserRoute + '/me', 'PATCH',
-      {
+      bffUserRoute + '/me', 'PATCH', {
         current_password: inputs.value[0].value,
         [param]: inputs.value[1].value
       }
@@ -70,7 +67,7 @@
       router.push({name: 'index'})
     }
     else {
-      alert.show(resp.body.msg)
+      alert.show(resp.data?.msg)
       submitting.value = false
     }
   }

@@ -7,7 +7,8 @@ export default defineNuxtRouteMiddleware(async(to, _) => {
   const user = useUserStore()
 
   const resp: Resp = await accessProtectedBff(bffUserRoute + '/me', 'GET')
-  resp.status === 200 ? user.login(resp.body.email, resp.body.name) : user.clear()
+  resp.status === 200 ?
+    user.login(resp.data?.email, resp.data?.name) : user.clear()
 
   const NoAuthRoutes: string[] = ['login', 'user-new']
   const targetRoute = to.name as string

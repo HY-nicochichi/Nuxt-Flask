@@ -1,8 +1,6 @@
 <script setup lang="ts">
   import {LoadingSpinner} from '~/components/SvgIcons'
-  import {
-    accessProtectedBff, bffUserRoute, bffAuthRoute
-  } from '~/composables/ApiClient'
+  import {accessProtectedBff, bffUserRoute, bffAuthRoute} from '~/composables/ApiClient'
   import {useUserStore} from '~/stores'
   import type {Resp} from '~/types'
 

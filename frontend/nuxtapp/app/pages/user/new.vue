@@ -3,12 +3,8 @@
   import FormArea from '~/components/FormArea.vue'
   import InputField from '~/components/InputField.vue'
   import SubmitButton from '~/components/SubmitButton.vue'
-  import {
-    accessBff, bffAuthRoute, bffUserRoute
-  } from '~/composables/ApiClient'
-  import {
-    validateEmail, validateName, validatePassword
-  } from '~/composables/Validation'
+  import {accessBff, bffAuthRoute, bffUserRoute} from '~/composables/ApiClient'
+  import {validateEmail, validateName, validatePassword} from '~/composables/Validation'
   import {useAlertStore} from '~/stores'
   import type {Input, Resp} from '~/types'
 
@@ -43,17 +39,15 @@
   async function createUser(): Promise<void> {
     submitting.value = true
     const resp1: Resp = await accessBff(
-      bffUserRoute, 'POST',
-      {
+      bffUserRoute, 'POST', {
         email: inputs.value[0].value,
         password: inputs.value[1].value,
         name: inputs.value[2].value
       }
     )
-    if (resp1.status === 204) {
+    if (resp1.status === 201) {
       const resp2: Resp = await accessBff(
-        bffAuthRoute + '/login', 'POST',
-        {
+        bffAuthRoute + '/login', 'POST', {
           email: inputs.value[0].value,
           password: inputs.value[1].value
         }
@@ -61,7 +55,7 @@
       router.push({name: resp2.status === 200 ? 'index' : 'login'})
     }
     else {
-      alert.show(resp1.body.msg)
+      alert.show(resp1.data?.msg)
       submitting.value = false
     }
   }

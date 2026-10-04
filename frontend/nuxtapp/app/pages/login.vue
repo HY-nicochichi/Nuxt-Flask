@@ -33,8 +33,7 @@
   async function login(): Promise<void> {
     submitting.value = true
     const resp: Resp = await accessBff(
-      bffAuthRoute + '/login', 'POST',
-      {
+      bffAuthRoute + '/login', 'POST', {
         email: inputs.value[0].value,
         password: inputs.value[1].value
       }
@@ -43,7 +42,7 @@
       router.push({name: 'index'})
     }
     else {
-      alert.show(resp.body.msg)
+      alert.show(resp.data?.msg)
       submitting.value = false
     }
   }

@@ -10,15 +10,12 @@ mockNuxtImport('useRoute', () => {
   return () => mockRoute
 })
 
-let mockBackendStatus = 200
-let mockBackendBody: any = {msg: 'Logged out successfully'}
+let mockBackendStatus: number = 200
+let mockBackendData: Record<string, any> = {msg: 'Logged out successfully'}
 
 mockNuxtImport('accessProtectedBff', () => {
   return async () => {
-    return {
-      status: mockBackendStatus,
-      body: mockBackendBody
-    }
+    return {status: mockBackendStatus, data: mockBackendData}
   }
 })
 
@@ -41,7 +38,7 @@ describe('NavBar', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockBackendStatus = 200
-    mockBackendBody = {msg: 'Logged out successfully'}
+    mockBackendData = {msg: 'Logged out successfully'}
   })
 
   it('When not logged in', async() => {

@@ -9,9 +9,7 @@
   const user = useUserStore()
 
   async function logout(): Promise<void> {
-    const resp: Resp = await accessProtectedBff(
-      bffAuthRoute + '/logout', 'GET'
-    )
+    const resp: Resp = await accessProtectedBff(bffAuthRoute + '/logout', 'GET')
     if (resp.status === 200) {
       route.name === 'index' ? router.go(0) : router.push({name: 'index'})
     }
