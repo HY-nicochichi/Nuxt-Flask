@@ -30,7 +30,7 @@ def create_db_data[T: AppModel](model: type[T], **kwargs) -> T:
     return instance
 
 user_data: dict[str, str] = {
-    'email': 'taro@email.com', 'password': 'Taro1234', 'name': 'Taro'
+    'email': 'taro@email.com', 'password': 'TaroPassword123', 'name': 'Taro'
 }
 
 def auth_header(id: UUID, refresh: bool = False) -> dict[str, str]:

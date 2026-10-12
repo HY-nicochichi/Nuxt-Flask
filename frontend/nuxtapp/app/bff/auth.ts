@@ -33,7 +33,7 @@ authRouter.post('/refresh', async(c) => {
   }
 })
 
-authRouter.get('/logout', async(c) => {
+authRouter.post('/logout', async(c) => {
   deleteTokenCookie(c, 'access')
   deleteTokenCookie(c, 'refresh')
   return c.json({msg: 'Logged out successfully'}, 200)

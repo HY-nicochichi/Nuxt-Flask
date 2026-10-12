@@ -18,7 +18,8 @@ async function setTokenCookie(
     httpOnly: true,
     secure: forceSslCookie,
     sameSite: 'Strict',
-    path: bffUrlBase + (type === 'refresh' ? bffAuthRoute : '')
+    path: bffUrlBase + (type === 'refresh' ? bffAuthRoute : ''),
+    maxAge: 14*24*60*60
   })
 }
 

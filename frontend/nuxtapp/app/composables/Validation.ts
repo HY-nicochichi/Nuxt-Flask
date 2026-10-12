@@ -3,7 +3,7 @@ function validateEmail(val: string): boolean {
 }
 
 function validatePassword(val: string): boolean {
-  return /^(?=.{8,20}$)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])[a-zA-Z0-9]+$/.test(val)
+  return /^(?=.{15,75}$)(?=.*[a-zA-Z])(?=.*[0-9])[\x21-\x7E]+$/.test(val)
 }
 
 function validateName(val: string): boolean {

@@ -1,8 +1,9 @@
 from typing import cast
-from flask import Flask, Response, g
+from flask import Flask, Response, jsonify, g
 from flask_jwt_extended import JWTManager
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session, sessionmaker
+from werkzeug.exceptions import HTTPException
 
 class ORMapper:
     def __init__(self, app: Flask|None = None) -> None:
@@ -29,26 +30,24 @@ class ORMapper:
         if session is not None:
             session.close()
 
-class NoResBody:
+class ResProcessor:
+    class Res(Response):
+        default_mimetype = None
+
     def __init__(self, app: Flask|None = None) -> None:
         if app is not None:
             self.init_app(app)
 
     def init_app(self, app: Flask) -> None:
-        app.after_request(self.fix_headers)
-        app.extensions['no_res_body'] = self
+        app.register_error_handler(HTTPException, self.jsonify_http_exc)
+        app.extensions['res_proc'] = self
 
     @staticmethod
-    def fix_headers(response: Response) -> Response:
-        if response.status_code == 201 and response.get_data() == b'':
-            response.headers.pop('Content-Type', default=None)
-        if response.status_code == 204:
-            response.headers.pop('Content-Type', default=None)
-            response.headers.pop('Content-Length', default=None)
-        return response
+    def jsonify_http_exc(e: HTTPException) -> tuple[Response, int]:
+        return jsonify(msg=e.name), e.code or 500
 
 orm = ORMapper()
 jwt = JWTManager()
-no_res_body = NoResBody()
+res_proc = ResProcessor()
 
-extensions: tuple[ORMapper, JWTManager, NoResBody] = (orm, jwt, no_res_body)
+extensions: tuple[ORMapper, JWTManager, ResProcessor] = (orm, jwt, res_proc)

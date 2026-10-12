@@ -21,19 +21,19 @@ describe('Validation', () => {
 
   describe('validatePassword', () => {
     it('Valid password', () => {
-      expect(validatePassword('Test1234')).toBe(true)
+      expect(validatePassword('TestPassword123')).toBe(true)
+      expect(validatePassword('test_password_123!')).toBe(true)
     })
 
     it('Invalid password length', () => {
-      expect(validatePassword('Test123')).toBe(false)
-      expect(validatePassword('Test' + '0'.repeat(20))).toBe(false)
+      expect(validatePassword('Test' + '0'.repeat(10))).toBe(false)
+      expect(validatePassword('Test' + '0'.repeat(72))).toBe(false)
     })
 
     it('Invalid password format', () => {
-      expect(validatePassword('test1234')).toBe(false)
-      expect(validatePassword('TEST1234')).toBe(false)
-      expect(validatePassword('TestTest')).toBe(false)
-      expect(validatePassword('Test1234!')).toBe(false)
+      expect(validatePassword('LetterOnlyPassword')).toBe(false)
+      expect(validatePassword('0'.repeat(15))).toBe(false)
+      expect(validatePassword('Test Password 123')).toBe(false)
     })
   })
 

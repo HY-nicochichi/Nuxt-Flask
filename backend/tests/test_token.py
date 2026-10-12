@@ -2,12 +2,11 @@ from json import dumps
 from werkzeug.test import TestResponse
 from flask_jwt_extended import decode_token
 from src.models.user import User
+from src.routers.token import TOKEN_ROUTE
 from tests import (
     isolated_test_env, create_db_data, auth_header,
     client, user_data, json_header
 )
-
-TOKEN_ROUTE: str = '/tokens'
 
 class TestCreateToken:
     @isolated_test_env
@@ -36,13 +35,11 @@ class TestCreateToken:
         )
         assert resp.status_code == 422
         assert resp.get_json() == {
-            'validation_failure': [
-                {
-                    'input': 'Invalid Password',
-                    'loc': ['password'],
-                    'msg': 'Password must be 8-20 characters and include uppercase, lowercase, and number'
-                }
-            ]
+            'validation_failure': [{
+                'input': 'Invalid Password',
+                'loc': ['password'],
+                'msg': 'Password must be 15-75 characters and include letters and numbers'
+            }]
         }
 
     @isolated_test_env
@@ -61,7 +58,7 @@ class TestCreateToken:
         resp: TestResponse = client.post(
             TOKEN_ROUTE,
             headers=json_header,
-            data=dumps({'email': user.email, 'password': 'WrongPassword1234'})
+            data=dumps({'email': user.email, 'password': 'WrongPassword123'})
         )
         assert resp.status_code == 401
         assert resp.get_json() == {'msg': 'Invalid email or password'}

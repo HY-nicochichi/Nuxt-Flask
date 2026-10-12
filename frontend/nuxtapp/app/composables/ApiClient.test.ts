@@ -32,14 +32,14 @@ describe('ApiClient', () => {
   })
 
   it('Access API', async() => {
-    testFetchResult(200, {email: 'test@email.com', password: 'Test1234'})
+    testFetchResult(200, {email: 'test@email.com', password: 'TestPassword123'})
     const promiseResp = accessApi(
       apiUserRoute + '/me', 'GET', undefined, 'test.jwt.value'
     )
     await vi.advanceTimersByTimeAsync(300)
     const resp = await promiseResp
     expect(resp.status).toBe(200)
-    expect(resp.data).toEqual({email: 'test@email.com', password: 'Test1234'})
+    expect(resp.data).toEqual({email: 'test@email.com', password: 'TestPassword123'})
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining(apiUrlBase + apiUserRoute + '/me'),
       expect.objectContaining({
@@ -54,7 +54,7 @@ describe('ApiClient', () => {
     testFetchResult(200, {msg: 'Logged in successfully'})
     const promiseResp = accessBff(
       bffAuthRoute + '/login', 'POST',
-      {email: 'test@email.com', password: 'Test1234'}
+      {email: 'test@email.com', password: 'TestPassword123'}
     )
     await vi.advanceTimersByTimeAsync(300)
     const resp = await promiseResp
@@ -67,7 +67,7 @@ describe('ApiClient', () => {
         credentials: 'same-origin',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-          email: 'test@email.com', password: 'Test1234'
+          email: 'test@email.com', password: 'TestPassword123'
         })
       })
     )
@@ -84,16 +84,13 @@ describe('ApiClient', () => {
     vi.clearAllMocks()
     vi.mocked(fetch)
       .mockImplementationOnce(async() => ({
-        status: 401,
-        json: async() => ({msg: 'Token has expired'})
+        status: 401, json: async() => ({msg: 'Token has expired'})
       } as Response))
       .mockImplementationOnce(async() => ({
-        status: 200,
-        json: async() => ({msg: 'Refreshed successfully'})
+        status: 200, json: async() => ({msg: 'Refreshed successfully'})
       } as Response))
       .mockImplementationOnce(async() => ({
-        status: 200,
-        json: async() => ({email: 'test@email.com', name: 'Test'})
+        status: 200, json: async() => ({email: 'test@email.com', name: 'Test'})
       } as Response))
     const promiseRespRetry = accessProtectedBff(bffUserRoute + '/me', 'GET')
     await vi.advanceTimersByTimeAsync(900)

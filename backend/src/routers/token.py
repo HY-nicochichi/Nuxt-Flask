@@ -6,7 +6,8 @@ from src.models.user import User, current_user
 from src.validations import validate_json
 from src.validations.token import CreateToken
 
-bp_token = Blueprint('bp_token', __name__, url_prefix='/tokens')
+TOKEN_ROUTE: str = '/tokens'
+bp_token = Blueprint('bp_token', __name__, url_prefix=TOKEN_ROUTE)
 
 @bp_token.post('')
 @validate_json

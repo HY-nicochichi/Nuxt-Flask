@@ -34,7 +34,7 @@ paths:
                   example: taro@email.com
                 password:
                   type: string
-                  example: Taro1234
+                  example: TaroPassword123
       responses:
         '200':
           description: Success
@@ -86,7 +86,7 @@ paths:
                   example: taro@email.com
                 password:
                   type: string
-                  example: Taro1234
+                  example: TaroPassword123
                 name:
                   type: string
                   example: Taro
@@ -129,13 +129,13 @@ paths:
               properties:
                 current_password:
                   type: string
-                  example: Taro1234
+                  example: TaroPassword123
                 email:
                   type: string
                   example: new-taro@email.com
                 password:
                   type: string
-                  example: NewTaro1234
+                  example: NewTaroPassword123
                 name:
                   type: string
                   example: New Taro

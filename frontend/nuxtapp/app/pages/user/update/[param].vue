@@ -8,17 +8,18 @@
   import {useAlertStore, useUserStore} from '~/stores'
   import type {Input, Resp} from '~/types'
 
-  const router = useRouter()
   const route = useRoute()
-
   const param = route.params.param as string
 
   if (!['email', 'password', 'name'].includes(param)) {
-    router.push('/404')
+    throw createError({
+      statusCode: 404, statusMessage: 'Page Not Found', fatal: true
+    })
   }
 
   useHead({title: 'update ' + param})
 
+  const router = useRouter()
   const alert = useAlertStore()
   const user = useUserStore()
 

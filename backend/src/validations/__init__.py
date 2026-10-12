@@ -26,6 +26,11 @@ def validate_json(func: Callable) -> Callable:
             return jsonify(validation_failure=validation_failure), 422
     return decorated
 
+def lower_str(validate_func: Callable[[str], str]) -> Callable[[str], str]:
+    def _lower_str(val: str) -> str:
+        return validate_func(val).lower()
+    return _lower_str
+
 def validate_str(regex: str, message: LiteralString) -> Callable[[str], str]:
     def _validate_str(val: str) -> str:
         if not fullmatch(regex, val):
@@ -38,8 +43,8 @@ validate_email: Callable[[str], str] = validate_str(
     'Email must be 6-100 characters and in a standard email format'
 )
 validate_password: Callable[[str], str] = validate_str(
-    r'^(?=.{8,20}$)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])[a-zA-Z0-9]+$',
-    'Password must be 8-20 characters and include uppercase, lowercase, and number'
+    r'^(?=.{15,75}$)(?=.*[a-zA-Z])(?=.*[0-9])[\x21-\x7E]+$',
+    'Password must be 15-75 characters and include letters and numbers'
 )
 validate_name: Callable[[str], str] = validate_str(
     r'^.{1,30}$', 'Name must be 1-30 characters'
