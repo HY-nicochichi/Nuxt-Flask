@@ -18,8 +18,7 @@ def create_token(data: CreateToken) -> tuple[Response, int]:
             access_token=create_access_token(str(user.id)),
             refresh_token=create_refresh_token(str(user.id))
         ), 200
-    else:
-        return jsonify(msg='Invalid email or password'), 401
+    return jsonify(msg='Invalid email or password'), 401
 
 @bp_token.post('/refresh')
 @jwt_required(refresh=True)

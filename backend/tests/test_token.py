@@ -35,7 +35,8 @@ class TestCreateToken:
         )
         assert resp.status_code == 422
         assert resp.get_json() == {
-            'validation_failure': [{
+            'msg': 'Validation failed',
+            'errors': [{
                 'input': 'Invalid Password',
                 'loc': ['password'],
                 'msg': 'Password must be 15-75 characters and include letters and numbers'

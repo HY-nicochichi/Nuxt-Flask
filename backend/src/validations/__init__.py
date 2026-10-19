@@ -7,23 +7,25 @@ from pydantic_core import PydanticCustomError
 from flask import Response, jsonify, request
 from werkzeug.exceptions import UnsupportedMediaType, BadRequest
 
-def validate_json(func: Callable) -> Callable:
+type EndpointFunc = Callable[..., tuple[Response, int]]
+
+def validate_json(func: EndpointFunc) -> EndpointFunc:
+    Schema: type[BaseModel] = func.__annotations__['data']
     @wraps(func)
     def decorated(*args, **kwargs) -> tuple[Response, int]:
         try:
-            Schema: type[BaseModel] = func.__annotations__['data']
             data: BaseModel = Schema.model_validate(request.get_json())
-            return func(data, *args, **kwargs)
         except UnsupportedMediaType:
             return jsonify(msg='Invalid Content-Type header'), 415
         except BadRequest:
             return jsonify(msg='Invalid JSON body syntax'), 400
         except ValidationError as e:
-            validation_failure: list[dict[str, Any]] = [
-                {key: detail[key] for key in ('input', 'loc', 'msg')}
-                for detail in e.errors()
+            errors: list[dict[str, Any]] = [
+                {key: error[key] for key in ('input', 'loc', 'msg')}
+                for error in e.errors()
             ]
-            return jsonify(validation_failure=validation_failure), 422
+            return jsonify(msg='Validation failed', errors=errors), 422
+        return func(data, *args, **kwargs)
     return decorated
 
 def lower_str(validate_func: Callable[[str], str]) -> Callable[[str], str]:

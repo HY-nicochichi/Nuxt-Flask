@@ -31,7 +31,9 @@ class User(AppModel):
     def update(self, **kwargs) -> None:
         super().update(**self.with_hashed_password(kwargs))
 
-    def to_dict(self, include = None, exclude = None):
+    def to_dict(
+        self, include: set[str]|None = None, exclude: set[str]|None = None
+    ) -> dict[str, Any]:
         return super().to_dict(include, (exclude or set())|{'password_hash'})
 
     def check_password(self, password: str) -> bool:
