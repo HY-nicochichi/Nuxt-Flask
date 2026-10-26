@@ -1,4 +1,4 @@
-FROM node:26.3.0-trixie-slim AS base
+FROM node:26.12.1-trixie-slim AS base
 ENV HOST=0.0.0.0
 ENV PORT=8080
 WORKDIR /app
@@ -21,6 +21,6 @@ CMD ["npm", "run", "dev"]
 
 FROM base AS prod
 COPY --from=base3 /app/.output .
-RUN useradd -u 12345 -U -s /sbin/nologin app
+RUN useradd -u 12345 -U -s /sbin/nologin -m app
 USER app
 CMD ["node", "server/index.mjs"]

@@ -1,4 +1,4 @@
-FROM python:3.14.5-slim-trixie AS base
+FROM python:3.14.10-slim-trixie AS base
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PORT=8000
@@ -26,5 +26,5 @@ COPY tests ./tests
 
 
 FROM base2 AS prod
-RUN useradd -u 12345 -U -s /sbin/nologin app
+RUN useradd -u 12345 -U -s /sbin/nologin -m app
 USER app

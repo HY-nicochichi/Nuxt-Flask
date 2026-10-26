@@ -22,7 +22,7 @@ def db_transaction() -> Generator[None, None, None]:
 def utc_now() -> datetime:
     return datetime.now(UTC).replace(tzinfo=None)
 
-type QueryFunc = Callable[[Select[tuple]], Select[tuple]]
+type QueryFunc[T] = Callable[[Select[T]], Select[T]]
 
 class AppModel(DeclarativeBase):
     __abstract__ = True
@@ -31,15 +31,15 @@ class AppModel(DeclarativeBase):
     updated: Mapped[datetime] = mapped_column(default=utc_now, onupdate=utc_now)
 
     @classmethod
-    def all(cls, *args: QueryFunc) -> list[Self]:
-        statement: Select[tuple[Self]] = select(cls)
+    def all(cls, *args: QueryFunc[Self]) -> list[Self]:
+        statement: Select[Self] = select(cls)
         for arg in args:
             statement = arg(statement)
         return cast(list[Self], orm.session.scalars(statement).unique().all())
 
     @classmethod
-    def calc[T](cls, element: ColumnElement[T], *args: QueryFunc) -> T|None:
-        statement: Select[tuple[T]] = select(element).select_from(cls)
+    def calc[T](cls, element: ColumnElement[T], *args: QueryFunc[T]) -> T|None:
+        statement: Select[T] = select(element).select_from(cls)
         for arg in args:
             statement = arg(statement)
         return orm.session.scalar(statement)
@@ -98,8 +98,8 @@ class AppModel(DeclarativeBase):
 
 class Q:
     @staticmethod
-    def where(*args, **kwargs) -> QueryFunc:
-        def _where(statement: Select[tuple]) -> Select[tuple]:
+    def where[T](*args, **kwargs) -> QueryFunc[T]:
+        def _where(statement: Select[T]) -> Select[T]:
             if args:
                 statement = statement.where(*args)
             if kwargs:
@@ -108,8 +108,10 @@ class Q:
         return _where
 
     @staticmethod
-    def offset_limit(offset: int|None = None, limit: int|None = None) -> QueryFunc:
-        def _offset_limit(statement: Select[tuple]) -> Select[tuple]:
+    def offset_limit[T](
+        offset: int|None = None, limit: int|None = None
+    ) -> QueryFunc[T]:
+        def _offset_limit(statement: Select[T]) -> Select[T]:
             if offset:
                 statement = statement.offset(offset)
             if limit:
@@ -118,31 +120,31 @@ class Q:
         return _offset_limit
 
     @staticmethod
-    def order_by(*args) -> QueryFunc:
-        def _order_by(statement: Select[tuple]) -> Select[tuple]:
+    def order_by[T](*args) -> QueryFunc[T]:
+        def _order_by(statement: Select[T]) -> Select[T]:
             return statement.order_by(*args)
         return _order_by
 
     @staticmethod
-    def group_by(*args) -> QueryFunc:
-        def _group_by(statement: Select[tuple]) -> Select[tuple]:
+    def group_by[T](*args) -> QueryFunc[T]:
+        def _group_by(statement: Select[T]) -> Select[T]:
             return statement.group_by(*args)
         return _group_by
 
     @staticmethod
-    def having(*args) -> QueryFunc:
-        def _having(statement: Select[tuple]) -> Select[tuple]:
+    def having[T](*args) -> QueryFunc[T]:
+        def _having(statement: Select[T]) -> Select[T]:
             return statement.having(*args)
         return _having
 
     @staticmethod
-    def join(*args, **kwargs) -> QueryFunc:
-        def _join(statement: Select[tuple]) -> Select[tuple]:
+    def join[T](*args, **kwargs) -> QueryFunc[T]:
+        def _join(statement: Select[T]) -> Select[T]:
             return statement.join(*args, **kwargs)
         return _join
 
     @staticmethod
-    def options(*args) -> QueryFunc:
-        def _options(statement: Select[tuple]) -> Select[tuple]:
+    def options[T](*args) -> QueryFunc[T]:
+        def _options(statement: Select[T]) -> Select[T]:
             return statement.options(*args)
         return _options

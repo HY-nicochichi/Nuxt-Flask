@@ -3,7 +3,6 @@ from json import dumps
 
 wsgi_app: str = 'src:app'
 bind: str = f'0.0.0.0:{environ['PORT']}'
-control_socket_disable: bool = True
 worker_tmp_dir: str = '/dev/shm'
 worker_class: str = 'gthread'
 workers: int = 1
