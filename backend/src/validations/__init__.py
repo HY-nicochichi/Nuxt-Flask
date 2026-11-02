@@ -5,7 +5,6 @@ from re import fullmatch
 from pydantic import BaseModel, ValidationError
 from pydantic_core import PydanticCustomError
 from flask import Response, jsonify, request
-from werkzeug.exceptions import UnsupportedMediaType, BadRequest
 
 type EndpointFunc = Callable[..., tuple[Response, int]]
 
@@ -15,10 +14,6 @@ def validate_json(func: EndpointFunc) -> EndpointFunc:
     def decorated(*args, **kwargs) -> tuple[Response, int]:
         try:
             data: BaseModel = Schema.model_validate(request.get_json())
-        except UnsupportedMediaType:
-            return jsonify(msg='Invalid Content-Type header'), 415
-        except BadRequest:
-            return jsonify(msg='Invalid JSON body syntax'), 400
         except ValidationError as e:
             errors: list[dict[str, Any]] = [
                 {key: error[key] for key in ('input', 'loc', 'msg')}

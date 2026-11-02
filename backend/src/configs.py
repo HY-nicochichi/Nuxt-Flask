@@ -3,6 +3,7 @@ from os import environ
 from datetime import timedelta
 
 class Config:
+    MAX_CONTENT_LENGTH: int = 1024
     JWT_SECRET_KEY: str = environ['JWT_SECRET_KEY']
     ORM_ENGINE_OPTIONS: dict[str, Any] = {
         'pool_size': int(environ['APP_CONCURRENCY']),

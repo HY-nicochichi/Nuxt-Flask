@@ -1,5 +1,6 @@
 from json import dumps
 from werkzeug.test import TestResponse
+from flask import current_app
 from flask_jwt_extended import decode_token
 from src.models.user import User
 from src.routers.token import TOKEN_ROUTE
@@ -10,21 +11,33 @@ from tests import (
 
 class TestCreateToken:
     @isolated_test_env
-    def test_Invalid_Content_Type_header_415() -> None:
+    def test_Unsupported_Media_Type_415() -> None:
         resp: TestResponse = client.post(
             TOKEN_ROUTE,
             data=dumps({'email': user_data['email'], 'password': user_data['password']})
         )
         assert resp.status_code == 415
-        assert resp.get_json() == {'msg': 'Invalid Content-Type header'}
+        assert resp.get_json() == {'msg': 'Unsupported Media Type'}
 
     @isolated_test_env
-    def test_Invalid_JSON_body_syntax_400() -> None:
+    def test_Bad_Request_400() -> None:
         resp: TestResponse = client.post(
             TOKEN_ROUTE, headers=json_header, data='Invalid JSON'
         )
         assert resp.status_code == 400
-        assert resp.get_json() == {'msg': 'Invalid JSON body syntax'}
+        assert resp.get_json() == {'msg': 'Bad Request'}
+
+    @isolated_test_env
+    def test_Request_Entity_Too_Large_413() -> None:
+        max_body_size: int = current_app.config['MAX_CONTENT_LENGTH']
+        too_long_json: str = dumps({
+            'key': 'A' * (max_body_size + 1 - len('{"key": ""}'))
+        })
+        resp: TestResponse = client.post(
+            TOKEN_ROUTE, headers=json_header, data=too_long_json
+        )
+        assert resp.status_code == 413
+        assert resp.get_json() == {'msg': 'Request Entity Too Large'}
 
     @isolated_test_env
     def test_Validation_failure_422() -> None:

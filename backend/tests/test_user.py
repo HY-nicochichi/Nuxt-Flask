@@ -48,13 +48,13 @@ class TestCreateUser:
 
 class TestGetMe:
     @isolated_test_env
-    def test_Missing_Authorization_header_401() -> None:
+    def test_Missing_Authorization_Header_401() -> None:
         resp: TestResponse = client.get(f'{USER_ROUTE}/me')
         assert resp.status_code == 401
         assert resp.get_json() == {'msg': 'Missing Authorization Header'}
 
     @isolated_test_env
-    def test_Error_loading_user_401() -> None:
+    def test_Error_loading_the_user_401() -> None:
         bad_id = uuid7()
         resp: TestResponse = client.get(
             f'{USER_ROUTE}/me', headers=auth_header(bad_id)
