@@ -3,17 +3,20 @@
   import FormArea from '~/components/FormArea.vue'
   import InputField from '~/components/InputField.vue'
   import SubmitButton from '~/components/SubmitButton.vue'
-  import {accessProtectedBff, bffUserRoute} from '~/composables/ApiClient'
+  import {bffUserRoute} from '#shared'
+  import {accessProtectedBff} from '~/composables/BffClient'
   import {validateEmail, validatePassword, validateName} from '~/composables/Validation'
   import {useAlertStore, useUserStore} from '~/stores'
-  import type {Input, Resp} from '~/types'
+  import type {Input} from '~/types'
 
   const route = useRoute()
   const param = route.params.param as string
 
   if (!['email', 'password', 'name'].includes(param)) {
     throw createError({
-      statusCode: 404, statusMessage: 'Page Not Found', fatal: true
+      statusCode: 404,
+      statusMessage: 'Page not found: /user/update/' + param,
+      fatal: true
     })
   }
 
@@ -30,22 +33,13 @@
     validation: validatePassword
   }
   const emailInput: Input = {
-    label: 'email',
-    type: 'text',
-    value: user.value.email,
-    validation: validateEmail
+    label: 'email', type: 'text', value: user.value.email, validation: validateEmail
   }
   const passwordInput: Input = {
-    label: 'password',
-    type: 'password',
-    value: '',
-    validation: validatePassword
+    label: 'password', type: 'password', value: '', validation: validatePassword
   }
   const nameInput: Input = {
-    label: 'name',
-    type: 'text',
-    value: user.value.name,
-    validation: validateName
+    label: 'name', type: 'text', value: user.value.name, validation: validateName
   }
 
   const inputs = ref([
@@ -58,17 +52,14 @@
 
   async function updateUser(): Promise<void> {
     submitting.value = true
-    const resp: Resp = await accessProtectedBff(
+    const res = await accessProtectedBff(
       bffUserRoute + '/me', 'PATCH', {
-        current_password: inputs.value[0].value,
-        [param]: inputs.value[1].value
+        current_password: inputs.value[0].value, [param]: inputs.value[1].value
       }
     )
-    if (resp.status === 204) {
-      router.push({name: 'index'})
-    }
+    if (res.status === 204) router.push({name: 'index'})
     else {
-      alert.show(resp.data?.msg)
+      alert.show(res.data?.msg)
       submitting.value = false
     }
   }

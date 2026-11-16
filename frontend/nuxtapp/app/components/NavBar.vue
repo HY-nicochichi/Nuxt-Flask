@@ -1,16 +1,16 @@
 <script setup lang="ts">
   import {BrandLogo, HamburgerMenu} from '~/components/SvgIcons'
-  import {accessProtectedBff, bffAuthRoute} from '~/composables/ApiClient'
+  import {bffAuthRoute} from '#shared'
+  import {accessProtectedBff} from '~/composables/BffClient'
   import {useUserStore} from '~/stores'
-  import type {Resp} from '~/types'
 
   const route = useRoute()
   const router = useRouter()
   const user = useUserStore()
 
   async function logout(): Promise<void> {
-    const resp: Resp = await accessProtectedBff(bffAuthRoute + '/logout', 'POST')
-    if (resp.status === 200) {
+    const res = await accessProtectedBff(bffAuthRoute + '/logout', 'POST')
+    if (res.status === 200) {
       route.name === 'index' ? router.go(0) : router.push({name: 'index'})
     }
   }

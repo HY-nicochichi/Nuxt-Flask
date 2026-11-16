@@ -1,9 +1,9 @@
 <script setup lang="ts">
   import AlertBox from '~/components/AlertBox.vue'
   import {LoadingSpinner} from '~/components/SvgIcons'
-  import {accessProtectedBff, bffUserRoute, bffAuthRoute} from '~/composables/ApiClient'
+  import {bffAuthRoute, bffUserRoute} from '#shared'
+  import {accessProtectedBff} from '~/composables/BffClient'
   import {useUserStore} from '~/stores'
-  import type {Resp} from '~/types'
 
   useHead({title: 'user info'})
 
@@ -16,14 +16,12 @@
   async function deleteUser(): Promise<void> {
     if (confirm('Confirm user deletion?')) {
       deleting.value = true
-      const resp: Resp = await accessProtectedBff(bffUserRoute + '/me', 'DELETE')
-      if (resp.status === 204) {
+      const res = await accessProtectedBff(bffUserRoute + '/me', 'DELETE')
+      if (res.status === 204) {
         await accessProtectedBff(bffAuthRoute + '/logout', 'POST')
         router.push({name: 'index'})
       }
-      else {
-        alert.show(resp.data?.msg)
-      }
+      else alert.show(res.data?.msg)
       deleting.value = false
     }
   }

@@ -3,10 +3,11 @@
   import FormArea from '~/components/FormArea.vue'
   import InputField from '~/components/InputField.vue'
   import SubmitButton from '~/components/SubmitButton.vue'
-  import {accessBff, bffAuthRoute, bffUserRoute} from '~/composables/ApiClient'
+  import {bffAuthRoute, bffUserRoute} from '#shared'
+  import {accessBff} from '~/composables/BffClient'
   import {validateEmail, validateName, validatePassword} from '~/composables/Validation'
   import {useAlertStore} from '~/stores'
-  import type {Input, Resp} from '~/types'
+  import type {Input} from '~/types'
 
   useHead({title: 'new user'})
 
@@ -14,48 +15,32 @@
   const alert = useAlertStore()
 
   const inputs: Ref<[Input, Input, Input]> = ref([
-    {
-      label: 'email',
-      type: 'text',
-      value: '',
-      validation: validateEmail
-    },
-    {
-      label: 'password',
-      type: 'password',
-      value: '',
-      validation: validatePassword
-    },
-    {
-      label: 'name',
-      type: 'text',
-      value: '',
-      validation: validateName
-    }
+    {label: 'email', type: 'text', value: '', validation: validateEmail},
+    {label: 'password', type: 'password', value: '', validation: validatePassword},
+    {label: 'name', type: 'text', value: '', validation: validateName}
   ])
 
   const submitting: Ref<boolean> = ref(false)
 
   async function createUser(): Promise<void> {
     submitting.value = true
-    const resp1: Resp = await accessBff(
+    const res1 = await accessBff(
       bffUserRoute, 'POST', {
         email: inputs.value[0].value,
         password: inputs.value[1].value,
         name: inputs.value[2].value
       }
     )
-    if (resp1.status === 201) {
-      const resp2: Resp = await accessBff(
+    if (res1.status === 201) {
+      const res2 = await accessBff(
         bffAuthRoute + '/login', 'POST', {
-          email: inputs.value[0].value,
-          password: inputs.value[1].value
+          email: inputs.value[0].value, password: inputs.value[1].value
         }
       )
-      router.push({name: resp2.status === 200 ? 'index' : 'login'})
+      router.push({name: res2.status === 200 ? 'index' : 'login'})
     }
     else {
-      alert.show(resp1.data?.msg)
+      alert.show(res1.data?.msg)
       submitting.value = false
     }
   }

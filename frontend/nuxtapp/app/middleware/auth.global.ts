@@ -1,14 +1,13 @@
-import {accessProtectedBff, bffUserRoute} from '~/composables/ApiClient'
+import {bffUserRoute} from '#shared'
+import {accessProtectedBff} from '~/composables/BffClient'
 import {useAlertStore, useUserStore} from '~/stores'
-import type {Resp} from '~/types'
 
 export default defineNuxtRouteMiddleware(async(to, _) => {
   useAlertStore().clear()
   const user = useUserStore()
 
-  const resp: Resp = await accessProtectedBff(bffUserRoute + '/me', 'GET')
-  resp.status === 200 ?
-    user.login(resp.data?.email, resp.data?.name) : user.clear()
+  const res = await accessProtectedBff(bffUserRoute + '/me', 'GET')
+  res.status === 200 ? user.login(res.data?.email, res.data?.name) : user.clear()
 
   const NoAuthRoutes: string[] = ['login', 'user-new']
   const targetRoute = to.name as string

@@ -6,7 +6,7 @@ export default defineNuxtConfig({
   css: ['~/app.scss'],
   serverHandlers: [{
     route: '/bff/**',
-    handler: '~/bff/index.ts',
+    handler: '#server/index.ts',
     middleware: false
   }],
   app: {

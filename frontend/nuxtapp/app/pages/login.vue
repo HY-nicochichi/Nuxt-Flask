@@ -3,10 +3,11 @@
   import FormArea from '~/components/FormArea.vue'
   import InputField from '~/components/InputField.vue'
   import SubmitButton from '~/components/SubmitButton.vue'
-  import {accessBff, bffAuthRoute} from '~/composables/ApiClient'
+  import {bffAuthRoute} from '#shared'
+  import {accessBff} from '~/composables/BffClient'
   import {validateEmail, validatePassword} from '~/composables/Validation'
   import {useAlertStore} from '~/stores'
-  import type {Input, Resp} from '~/types'
+  import type {Input} from '~/types'
 
   useHead({title: 'login'})
 
@@ -14,35 +15,22 @@
   const alert = useAlertStore()
 
   const inputs: Ref<[Input, Input]> = ref([
-    {
-      label: 'email',
-      type: 'text',
-      value: '',
-      validation: validateEmail
-    },
-    {
-      label: 'password',
-      type: 'password',
-      value: '',
-      validation: validatePassword
-    }
+    {label: 'email', type: 'text', value: '', validation: validateEmail},
+    {label: 'password', type: 'password', value: '', validation: validatePassword}
   ])
 
   const submitting: Ref<boolean> = ref(false)
 
   async function login(): Promise<void> {
     submitting.value = true
-    const resp: Resp = await accessBff(
+    const res = await accessBff(
       bffAuthRoute + '/login', 'POST', {
-        email: inputs.value[0].value,
-        password: inputs.value[1].value
+        email: inputs.value[0].value, password: inputs.value[1].value
       }
     )
-    if (resp.status === 200) {
-      router.push({name: 'index'})
-    }
+    if (res.status === 200) router.push({name: 'index'})
     else {
-      alert.show(resp.data?.msg)
+      alert.show(res.data?.msg)
       submitting.value = false
     }
   }
